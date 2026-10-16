@@ -49,6 +49,7 @@ try {
     ["api", "--method", "PUT", `repos/${repository}/pages`, "--input", "-"],
     { input: JSON.stringify(configuration) },
   );
+  run("gh", ["api", "--method", "POST", `repos/${repository}/pages/builds`]);
   console.log(
     "Deployment submitted: https://yogurtcp.github.io/bar-adventures/",
   );

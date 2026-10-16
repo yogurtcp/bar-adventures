@@ -95,3 +95,4 @@ The current product has one scrolling route with 24 alternating addition-race an
 
 - Made runtime asset and entry paths work under the GitHub Pages project subpath. Added a static build and a branch-based Pages deployment command; the authenticated account has repository permission but no workflow scope, so publishing does not require a workflow upload.
 - Yucky items now fly toward Bar’s mouth just like the food rewards. Added three short, locally synthesized cartoon “eww” vocal gestures, timed to the approaching item, with automatic ducking of the musical loss cue. Mute and canceled navigation apply to the delayed cue too.
+- Chrome verified the yucky item moves from the plate toward Bar’s face, the three vowel/formant variants produce distinct audible, unclipped output, mute suppresses the sound, and leaving the game cancels the delayed “eww.” No runtime errors. Report: `artifacts/food-review/eww-report.json`.
