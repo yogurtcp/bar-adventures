@@ -11,6 +11,7 @@ import {
   freshSave,
   normalizeSave,
   migrateRaceSave,
+  migrateJourneySave,
   newRound,
   submit,
   completeRound,
@@ -19,6 +20,14 @@ import {
   mealFor,
 } from "./journey-model.js";
 import { foodScene, foodResult, FOOD_ASSET, objectImage } from "./food-view.js";
+import {
+  rocketScene,
+  rocketQuestion,
+  rocketTutorial,
+  rocketResult,
+  rocketPoint,
+  ROCKET_ASSET,
+} from "./rocket-view.js";
 import { ASSET, icon, scenery, checkers } from "./race-art.js";
 import { playSound, updateSoundOptions } from "./race-sound.js";
 import { DEBUG_UNLOCK_ALL_LEVELS } from "./config.js";
@@ -42,6 +51,7 @@ let locked = false;
 let storageAvailable = true;
 let mapScroll = null;
 const isFood = () => save.round?.kind === "food";
+const isRocket = () => save.round?.kind === "rocket";
 const roundStage = () => save.round?.stage || save.selected;
 function readSave() {
   try {
@@ -49,6 +59,14 @@ function readSave() {
       localStorage.getItem(activeSaveKey) ||
       (DEBUG_UNLOCK_ALL_LEVELS ? localStorage.getItem(SAVE_KEY) : null);
     if (raw) return normalizeForMode(JSON.parse(raw));
+    const journeyRaw =
+      localStorage.getItem(
+        DEBUG_UNLOCK_ALL_LEVELS ? "bar-journey-v3-debug" : "bar-journey-v3",
+      ) || localStorage.getItem("bar-journey-v3");
+    if (journeyRaw)
+      return migrateJourneySave(JSON.parse(journeyRaw), {
+        unlockAllLevels: DEBUG_UNLOCK_ALL_LEVELS,
+      });
     const raceRaw =
       localStorage.getItem(
         DEBUG_UNLOCK_ALL_LEVELS ? "bar-race-v2-debug" : "bar-race-v2",
@@ -109,7 +127,7 @@ function currentTask() {
 function topbar() {
   const level =
     view === "play" || view === "result" ? roundStage() : save.selected;
-  return `<header class="topbar"><div class="brand-symbol ${view !== "home" && isFood() ? "food-brand" : ""}" aria-label="Bar’s adventures">${view !== "home" && isFood() ? icon("plate") : checkers()}</div><div class="top-middle">${view === "play" ? `<div class="question-flags" aria-label="Round questions">${save.round.tasks.map((q, i) => `<span class="question-flag ${q.resolved ? (q.firstTry ? "passed" : "missed") : i === save.round.index ? "active" : ""}" aria-label="Question ${i + 1}${q.resolved ? (q.firstTry ? ", correct first try" : ", completed with help") : ""}">${q.resolved ? icon(q.firstTry ? "check" : "flag") : `<i></i>`}</span>`).join("")}</div>` : `<span class="level-pill" aria-label="Level ${level}">${icon("flag")}<b>${level}</b></span>`}</div><nav class="top-actions" aria-label="Game controls">${view !== "home" ? button("home", "Back to stage map", "home") : ""}${view === "play" && phase !== "finish" ? button("help", "Show silent example", "hand") : ""}${button("sound", save.sound ? "Mute sounds" : "Enable sounds", save.sound ? "sound" : "mute")}${button("parent", "Parent settings", "settings")}</nav></header>`;
+  return `<header class="topbar"><div class="brand-symbol ${view !== "home" && isRocket() ? "rocket-brand" : view !== "home" && isFood() ? "food-brand" : ""}" aria-label="Bar’s adventures">${view !== "home" && isRocket() ? icon("rocket") : view !== "home" && isFood() ? icon("plate") : checkers()}</div><div class="top-middle">${view === "play" ? `<div class="question-flags" aria-label="Round questions">${save.round.tasks.map((q, i) => `<span class="question-flag ${q.resolved ? (q.firstTry ? "passed" : "missed") : i === save.round.index ? "active" : ""}" aria-label="Question ${i + 1}${q.resolved ? (q.firstTry ? ", correct first try" : ", completed with help") : ""}">${q.resolved ? icon(q.firstTry ? "check" : "flag") : `<i></i>`}</span>`).join("")}</div>` : `<span class="level-pill" aria-label="Level ${level}">${icon("flag")}<b>${level}</b></span>`}</div><nav class="top-actions" aria-label="Game controls">${view !== "home" ? button("home", "Back to stage map", "home") : ""}${view === "play" && phase !== "finish" ? button("help", "Show silent example", "hand") : ""}${button("sound", save.sound ? "Mute sounds" : "Enable sounds", save.sound ? "sound" : "mute")}${button("parent", "Parent settings", "settings")}</nav></header>`;
 }
 function racerSprite(driver) {
   if (driver.id !== "bar" || view !== "play") return driver.sprite;
@@ -157,11 +175,18 @@ function racers(distance, finishing = false) {
 function track(distance, finishing = false) {
   return `<section class="race-stage ${feedback ? "reaction-" + feedback : ""} ${phase === "countdown" ? "starting" : ""} ${finishing ? "finishing" : ""}" aria-label="Live race track">${scenery(roundStage())}<div class="track-side"><span class="track-flower"></span><span class="track-flower second"></span></div><div class="road"><div class="curb upper"></div><div class="start-line" aria-hidden="true"></div><div class="finish-line" aria-label="Finish line">${checkers()}<span class="finish-pole"></span></div>${racers(distance, finishing)}<div class="curb lower"></div></div><div class="grass-bottom"></div>${phase === "countdown" ? `<div class="start-lights" aria-label="Race starts in ${countdown}">${[3, 2, 1].map((n) => `<i class="${countdown >= n ? "lit" : ""}"></i>`).join("")}</div>` : ""}${phase === "finish" ? `<div class="finish-flags" aria-hidden="true">${checkers()}${checkers()}</div>` : ""}</section>`;
 }
+function activityPicture(kind) {
+  return kind === "race"
+    ? `<img src="${ASSET}bar.png" alt="Race" draggable="false"/>`
+    : kind === "rocket"
+      ? `<img src="${ROCKET_ASSET}ship.png" alt="Rocket trip" draggable="false"/>`
+      : objectImage("egg");
+}
 function homeScreen() {
-  return `<section class="home-screen">${routeScreen()}<div class="start-dock"><div class="selected-activity" aria-label="Selected activity">${stageInfo(save.selected).kind === "race" ? `<img src="${ASSET}bar.png" alt="Race"/>` : objectImage("egg")}<b>${save.selected}</b></div><button class="start-button" id="play" aria-label="Start or continue stage ${save.selected}">${icon("play")}</button><div class="earned-cups" aria-label="${save.completed.length} completed stages">${[0, 1, 2].map((i) => `<span class="${save.completed.length > i ? "earned" : ""}">${icon("trophy")}</span>`).join("")}</div></div></section>`;
+  return `<section class="home-screen">${routeScreen()}<div class="start-dock"><div class="selected-activity" aria-label="Selected activity">${activityPicture(stageInfo(save.selected).kind)}<b>${save.selected}</b></div><button class="start-button" id="play" aria-label="Start or continue stage ${save.selected}">${icon("play")}</button><div class="earned-cups" aria-label="${save.completed.length} completed stages">${[0, 1, 2].map((i) => `<span class="${save.completed.length > i ? "earned" : ""}">${icon("trophy")}</span>`).join("")}</div></div></section>`;
 }
 function routeScreen() {
-  const height = 1440;
+  const height = Math.ceil(STAGE_COUNT / 3) * 165 + 120;
   const pts = Array.from({ length: STAGE_COUNT }, (_, i) => {
     const row = Math.floor(i / 3),
       col = row % 2 ? 2 - (i % 3) : i % 3;
@@ -177,14 +202,14 @@ function routeScreen() {
         ? ` C${prev.x + side} ${prev.y + 60} ${p.x + side} ${p.y - 60} ${p.x} ${p.y}`
         : ` L${p.x} ${p.y}`;
   }
-  return `<section class="route-screen journey-route"><div class="route-scroll" tabindex="0" aria-label="Scroll to explore race and food stages"><div class="route-map" style="height:${height}px"><svg class="level-road" viewBox="0 0 1000 ${height}" preserveAspectRatio="none" aria-hidden="true"><path d="${path}" fill="none" stroke="#a3b599" stroke-width="65" stroke-linecap="round" stroke-linejoin="round"/><path d="${path}" fill="none" stroke="#fff2c9" stroke-width="3" stroke-dasharray="12 12"/></svg>${pts
+  return `<section class="route-screen journey-route"><div class="route-scroll" tabindex="0" aria-label="Scroll to explore race, food and rocket stages"><div class="route-map" style="height:${height}px"><svg class="level-road" viewBox="0 0 1000 ${height}" preserveAspectRatio="none" aria-hidden="true"><path d="${path}" fill="none" stroke="#a3b599" stroke-width="65" stroke-linecap="round" stroke-linejoin="round"/><path d="${path}" fill="none" stroke="#fff2c9" stroke-width="3" stroke-dasharray="12 12"/></svg>${pts
     .map((p, i) => {
       const n = i + 1,
         kind = stageInfo(n).kind,
         done = save.completed.includes(n),
         locked = !DEBUG_UNLOCK_ALL_LEVELS && n > save.unlocked,
         current = n === save.unlocked;
-      return `<button class="level-node activity-${kind} ${done ? "complete" : ""} ${current ? "current" : ""} ${n === save.selected ? "selected" : ""} ${locked ? "locked" : ""}" style="left:${p.x / 10}%;top:${p.y}px" data-level="${n}" data-activity="${kind}" data-stage-state="${locked ? "locked" : done ? "passed" : current ? "current" : "available"}" ${current ? 'aria-current="step"' : ""} ${locked ? "disabled" : ""} aria-label="Stage ${n}, ${kind}${done ? ", passed" : ""}${current ? ", current stage" : ""}${locked ? ", locked" : ""}"><span class="node-picture">${kind === "race" ? `<img src="${ASSET}bar.png" alt="Race" draggable="false"/>` : objectImage("egg")}</span><b>${n}</b>${done ? `<span class="node-check">${icon("check")}</span>` : locked ? `<span class="node-lock">${icon("lock")}</span>` : ""}${current ? `<span class="current-stage-marker">${icon("flag")}</span>` : ""}</button>`;
+      return `<button class="level-node activity-${kind} ${done ? "complete" : ""} ${current ? "current" : ""} ${n === save.selected ? "selected" : ""} ${locked ? "locked" : ""}" style="left:${p.x / 10}%;top:${p.y}px" data-level="${n}" data-activity="${kind}" data-stage-state="${locked ? "locked" : done ? "passed" : current ? "current" : "available"}" ${current ? 'aria-current="step"' : ""} ${locked ? "disabled" : ""} aria-label="Stage ${n}, ${kind}${done ? ", passed" : ""}${current ? ", current stage" : ""}${locked ? ", locked" : ""}"><span class="node-picture">${activityPicture(kind)}</span><b>${n}</b>${done ? `<span class="node-check">${icon("check")}</span>` : locked ? `<span class="node-lock">${icon("lock")}</span>` : ""}${current ? `<span class="current-stage-marker">${icon("flag")}</span>` : ""}</button>`;
     })
     .join(
       "",
@@ -199,6 +224,8 @@ function quantity(q, help = false) {
   return `<div class="quantity-cue ${help ? "joining" : ""}" aria-hidden="true">${dots(q.a, "red")}<span>${isFood() ? "−" : "+"}</span>${dots(q.b, "blue")}${help ? `<span>=</span><span class="joined-dots">${isFood() ? dots(q.answer, "red") : dots(q.a, "red") + dots(q.b, "blue")}</span>` : ""}</div>`;
 }
 function questionPanel() {
+  if (isRocket())
+    return `<section class="math-dock rocket-dock ${feedback ? "feedback-" + feedback : ""} ${questionEntry ? "new-question" : ""}" aria-label="Missing-number question">${rocketQuestion(currentTask(), save.round, locked)}<span class="feedback-symbol ${feedback}" role="status" aria-label="${feedback === "correct" ? "Power cell earned" : feedback === "wrong" ? "Engine hiccup, correct number shown" : ""}">${feedback ? icon(feedback === "correct" ? "check" : "replay") : ""}</span></section>`;
   const q = currentTask(),
     done = q.resolved;
   const showHelp = save.round.level <= 3 || q.rejected.length > 0;
@@ -210,10 +237,12 @@ function resultButtons(won) {
 function resultScreen() {
   const won = wonRound(save.round);
   if (isFood()) return foodResult(save.round, resultButtons(won));
+  if (isRocket()) return rocketResult(save.round, resultButtons(won));
   const winner = standings(save.round)[0];
   return `<section class="result-screen ${won ? "won" : "try-again"}"><div class="result-art"><img src="${ASSET}${won ? "victory" : "finish-" + winner.id}.png" alt="${won ? "Bar crosses first in his red car while his animal friends cheer" : winner.name + " wins this race and Bar gives a friendly wave from his red car"}"/></div><div class="result-dock"><div class="result-medal">${icon(won ? "trophy" : "flag")}</div><div class="result-score" aria-label="${score(save.round)} out of 8 correct on the first try">${save.round.tasks.map((q) => `<i class="${q.firstTry ? "passed" : "missed"}">${icon(q.firstTry ? "check" : "flag")}</i>`).join("")}</div><div class="result-actions">${resultButtons(won)}</div></div></section>`;
 }
 function tutorial() {
+  if (isRocket()) return rocketTutorial(demoStep);
   const food = isFood(),
     result = food ? 2 : 3;
   return `<div class="tutorial-backdrop" role="dialog" aria-modal="true" aria-label="Silent example: ${food ? "three minus one makes two" : "one plus two makes three"}"><div class="tutorial-card ${food ? "food-example" : ""} step-${demoStep}"><div class="example-equation"><span>${food ? 3 : 1}</span><b>${food ? "−" : "+"}</b><span>${food ? 1 : 2}</span><b>=</b><span class="answer-slot ${demoStep >= 2 ? "filled" : ""}">${demoStep >= 2 ? result : "?"}</span></div><div class="example-dots">${food ? `<span class="dot-group red"><i></i><i></i><i class="taken"></i></span><span class="join-arrow">${icon("next")}</span>${dots(2, "red")}` : `${dots(1, "red")}<span>+</span>${dots(2, "blue")}<span class="join-arrow">${icon("next")}</span><span class="joined-dots">${dots(1, "red")}${dots(2, "blue")}</span>`}</div><div class="example-options"><span class="example-answer ${demoStep >= 2 ? "correct" : ""}">${result}${demoStep >= 1 ? `<span class="demo-hand">${icon("hand")}</span>` : ""}</span><span class="example-answer">${food ? 4 : 5}</span></div><div class="demo-reward"><img src="${food ? FOOD_ASSET + "eating" : ASSET + "bar"}.png" alt=""/>${food ? objectImage("apple") : '<span class="boost-chevrons">»</span>'}</div><button class="demo-continue" id="demo-continue" aria-label="Start playing">${icon("play")}</button></div></div>`;
@@ -221,14 +250,14 @@ function tutorial() {
 function render(options = {}) {
   document.documentElement.classList.toggle("reduce-motion", reduced());
   const target =
-    view === "play"
+    view === "play" && !isRocket()
       ? positions(save.round)
       : { bar: 0, bunny: 0, fox: 0, panda: 0 };
   const from = options.from || target;
   const finishing = phase === "finish";
   const oldScroll = root.querySelector(".route-scroll");
   if (oldScroll) mapScroll = oldScroll.scrollTop;
-  root.innerHTML = `<main class="app-shell screen-${view}">${topbar()}${view === "home" ? homeScreen() : view === "levels" ? routeScreen() : view === "result" ? resultScreen() : `<div class="race-screen">${isFood() ? foodScene(save.round, feedback) : track(from, finishing)}${questionPanel()}</div>`}${demo ? tutorial() : ""}</main>`;
+  root.innerHTML = `<main class="app-shell screen-${view}">${topbar()}${view === "home" ? homeScreen() : view === "levels" ? routeScreen() : view === "result" ? resultScreen() : `<div class="race-screen">${isRocket() ? rocketScene(save.round, feedback, options.rocketFrom, finishing) : isFood() ? foodScene(save.round, feedback) : track(from, finishing)}${questionPanel()}</div>`}${demo ? tutorial() : ""}</main>`;
   bind();
   questionEntry = false;
   fitExpressionHeads();
@@ -260,7 +289,21 @@ function render(options = {}) {
     root.querySelector(".race-screen").inert = true;
     document.getElementById("demo-continue")?.focus({ preventScroll: true });
   }
-  if (options.from || finishing) {
+  if (isRocket() && view === "play") {
+    const craft = root.querySelector("[data-rocket]");
+    if (options.rocketFrom || finishing) {
+      craft.getBoundingClientRect();
+      const point = finishing
+        ? wonRound(save.round)
+          ? { x: 88, y: 26 }
+          : { x: 12, y: 76 }
+        : rocketPoint(save.round);
+      craft.style.left = `${point.x}%`;
+      craft.style.top = `${point.y}%`;
+    }
+    fitPilotZoom();
+  }
+  if (!isRocket() && (options.from || finishing)) {
     root.querySelector(".road")?.getBoundingClientRect();
     root.querySelectorAll("[data-car]").forEach((car) => {
       const distance = finishing ? 104 : target[car.dataset.car];
@@ -290,10 +333,11 @@ function bind() {
     clearTimers();
     demo = false;
     if (view === "play" && phase === "intro") {
-      if (isFood()) save.taughtFood = true;
+      if (isRocket()) save.taughtRocket = true;
+      else if (isFood()) save.taughtFood = true;
       else save.taught = true;
       persist();
-      if (isFood()) {
+      if (isFood() || isRocket()) {
         phase = "question";
         locked = false;
         render();
@@ -351,7 +395,22 @@ function prepareRace(level, replay = false) {
   )
     save.round = newRound(level);
   persist();
-  if (isFood() ? !save.taughtFood : !save.taught) {
+  if (isRocket()) {
+    for (const state of [
+      "ship",
+      "ship-boost",
+      "ship-oops",
+      "landing",
+      "return",
+    ]) {
+      const image = new Image();
+      image.decoding = "async";
+      image.src = `${ROCKET_ASSET}${state}.png`;
+    }
+  }
+  if (
+    isRocket() ? !save.taughtRocket : isFood() ? !save.taughtFood : !save.taught
+  ) {
     phase = "intro";
     render();
     showDemo(true);
@@ -363,7 +422,7 @@ function prepareRace(level, replay = false) {
       questionEntry = true;
       render();
     }
-  } else if (isFood()) {
+  } else if (isFood() || isRocket()) {
     phase = "question";
     locked = false;
     questionEntry = true;
@@ -388,7 +447,7 @@ function showDemo(first) {
   later(() => {
     demoStep = 3;
     render();
-    sound(isFood() ? "win" : "boost");
+    sound(isRocket() ? "rocket-boost" : isFood() ? "win" : "boost");
   }, 2300);
 }
 function startCountdown() {
@@ -417,7 +476,7 @@ function startCountdown() {
 }
 function answer(value) {
   if (view !== "play" || phase !== "question" || locked || demo) return;
-  const before = positions(save.round);
+  const before = isRocket() ? rocketPoint(save.round) : positions(save.round);
   const result = submit(save.round, value);
   if (!result.accepted) return;
   locked = true;
@@ -425,7 +484,8 @@ function answer(value) {
   completeRound(save);
   persist();
   sound(result.correct ? "win" : "lose");
-  render({ from: before });
+  if (isRocket()) sound(result.correct ? "rocket-boost" : "rocket-sputter");
+  render(isRocket() ? { rocketFrom: before } : { from: before });
   const roundId = save.round.id;
   const taskId = currentTask().id;
   if (isFood() && !result.correct) {
@@ -454,7 +514,7 @@ function answer(value) {
 }
 function nextQuestion() {
   if (locked || demo || !currentTask()?.resolved) return;
-  if (save.round.index === 7) {
+  if (isRocket() ? save.round.status === "finished" : save.round.index === 7) {
     finishRace();
     return;
   }
@@ -467,6 +527,26 @@ function nextQuestion() {
   sound(isFood() && mealFor(save.round).bonus ? "bonus" : "question");
 }
 function finishRace() {
+  if (isRocket()) {
+    phase = "finish";
+    locked = true;
+    feedback = "";
+    completeRound(save);
+    persist();
+    render({ rocketFrom: rocketPoint(save.round) });
+    sound(wonRound(save.round) ? "rocket-land" : "rocket-return");
+    later(
+      () => {
+        view = "result";
+        phase = "idle";
+        locked = false;
+        render();
+        scheduleWinReturn();
+      },
+      reduced() ? 700 : 1500,
+    );
+    return;
+  }
   if (isFood()) {
     view = "result";
     phase = "idle";
@@ -553,7 +633,7 @@ function adultSettings() {
       panel.querySelector("input").focus();
       return;
     }
-    panel.innerHTML = `<div class="adult-dialog"><div class="adult-heading"><h2>Parent settings</h2><button type="button" data-close aria-label="Close parent settings">${icon("close")}</button></div><p>Alternating addition races and subtraction meals. Eight questions each. Races need six first-try answers; meals need seven food points out of ten. Two sweets are double bonuses. Food questions have one attempt, then show the answer and move on. Thinking time is unlimited.</p><label>Sound volume<input type="range" min="0" max=".7" step=".05" value="${save.volume}"/></label><div class="adult-sound-previews"><button type="button" data-preview-win>Preview correct-answer sound</button><button type="button" data-preview-lose>Preview wrong-answer sound</button></div><label class="check-label"><input type="checkbox" data-motion ${save.reducedMotion ? "checked" : ""}/> Reduce motion</label><button type="button" data-demo>Show silent example next time</button><button type="button" data-reset>Reset adventure progress</button><p class="storage-status">${storageAvailable ? "Progress saves in this browser." : "This browser is not allowing progress to be saved."}</p></div>`;
+    panel.innerHTML = `<div class="adult-dialog"><div class="adult-heading"><h2>Parent settings</h2><button type="button" data-close aria-label="Close parent settings">${icon("close")}</button></div><p>Addition races, subtraction meals, and missing-number rocket trips. Rockets begin after three race/food pairs, with their own easy starting difficulty. Races and meals have eight questions each. Races need six first-try answers; meals need seven food points out of ten. Two sweets are double bonuses. Food questions have one attempt, then show the answer and move on. Rocket missions need six power cells before three mistakes, ending as soon as either is reached. Thinking time is unlimited.</p><label>Sound volume<input type="range" min="0" max=".7" step=".05" value="${save.volume}"/></label><div class="adult-sound-previews"><button type="button" data-preview-win>Preview correct-answer sound</button><button type="button" data-preview-lose>Preview wrong-answer sound</button></div><label class="check-label"><input type="checkbox" data-motion ${save.reducedMotion ? "checked" : ""}/> Reduce motion</label><button type="button" data-demo>Show silent example next time</button><button type="button" data-reset>Reset adventure progress</button><p class="storage-status">${storageAvailable ? "Progress saves in this browser." : "This browser is not allowing progress to be saved."}</p></div>`;
     panel.querySelector("[data-close]").onclick = close;
     panel.querySelector("input[type=range]").oninput = (e) => {
       save.volume = +e.target.value;
@@ -576,6 +656,7 @@ function adultSettings() {
     panel.querySelector("[data-demo]").onclick = () => {
       save.taught = false;
       save.taughtFood = false;
+      save.taughtRocket = false;
       persist();
       panel.querySelector("[data-demo]").textContent =
         "Example will play before the next activity";
@@ -597,7 +678,19 @@ function adultSettings() {
     panel.querySelector("[data-close]").focus();
   };
 }
-window.addEventListener("resize", fitExpressionHeads);
+function fitPilotZoom() {
+  const zoom = root.querySelector(".pilot-zoom");
+  if (!zoom) return;
+  const stage = zoom.closest(".rocket-stage");
+  const craft = zoom.closest(".rocket-craft");
+  const point = rocketPoint(save.round);
+  const top = (stage.clientHeight * point.y) / 100 - craft.offsetHeight / 2;
+  zoom.style.top = `${Math.max(68 - top, -90)}px`;
+}
+window.addEventListener("resize", () => {
+  fitExpressionHeads();
+  fitPilotZoom();
+});
 render();
 // Warm expression sprites while the map is open, before the first answer.
 for (const pose of ["ready", "eating", "eww", "strong", "tired"]) {
