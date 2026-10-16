@@ -1,0 +1,312 @@
+{
+  "characterReference": "art-source/bar-character-reference.png",
+  "scenes": {
+    "race": {
+      "path": "public/assets/scenes/race.webp",
+      "width": 768,
+      "height": 768,
+      "sourceCell": [0, 0]
+    },
+    "food": {
+      "path": "public/assets/scenes/food.webp",
+      "width": 768,
+      "height": 768,
+      "sourceCell": [1, 0]
+    },
+    "rocket": {
+      "path": "public/assets/scenes/rocket.webp",
+      "width": 768,
+      "height": 768,
+      "sourceCell": [2, 0]
+    },
+    "goal": {
+      "path": "public/assets/scenes/goal.webp",
+      "width": 768,
+      "height": 768,
+      "sourceCell": [0, 1]
+    },
+    "fish": {
+      "path": "public/assets/scenes/fish.webp",
+      "width": 768,
+      "height": 768,
+      "sourceCell": [1, 1]
+    },
+    "tree": {
+      "path": "public/assets/scenes/tree.webp",
+      "width": 768,
+      "height": 768,
+      "sourceCell": [2, 1]
+    },
+    "treasure": {
+      "path": "public/assets/scenes/treasure.webp",
+      "width": 768,
+      "height": 768,
+      "sourceCell": [0, 2]
+    },
+    "pancake": {
+      "path": "public/assets/scenes/pancake.webp",
+      "width": 768,
+      "height": 768,
+      "sourceCell": [1, 2]
+    },
+    "dino": {
+      "path": "public/assets/scenes/dino.webp",
+      "width": 768,
+      "height": 768,
+      "sourceCell": [2, 2]
+    },
+    "race-oops": {
+      "path": "public/assets/scenes/race-oops.webp",
+      "width": 768,
+      "height": 768,
+      "sourceCell": [0, 0]
+    },
+    "food-oops": {
+      "path": "public/assets/scenes/food-oops.webp",
+      "width": 768,
+      "height": 768,
+      "sourceCell": [1, 0]
+    },
+    "rocket-oops": {
+      "path": "public/assets/scenes/rocket-oops.webp",
+      "width": 768,
+      "height": 768,
+      "sourceCell": [2, 0]
+    },
+    "goal-oops": {
+      "path": "public/assets/scenes/goal-oops.webp",
+      "width": 768,
+      "height": 768,
+      "sourceCell": [0, 1]
+    },
+    "fish-oops": {
+      "path": "public/assets/scenes/fish-oops.webp",
+      "width": 768,
+      "height": 768,
+      "sourceCell": [1, 1]
+    },
+    "tree-oops": {
+      "path": "public/assets/scenes/tree-oops.webp",
+      "width": 768,
+      "height": 768,
+      "sourceCell": [2, 1]
+    },
+    "treasure-oops": {
+      "path": "public/assets/scenes/treasure-oops.webp",
+      "width": 768,
+      "height": 768,
+      "sourceCell": [0, 2]
+    },
+    "pancake-oops": {
+      "path": "public/assets/scenes/pancake-oops.webp",
+      "width": 768,
+      "height": 768,
+      "sourceCell": [1, 2]
+    },
+    "dino-oops": {
+      "path": "public/assets/scenes/dino-oops.webp",
+      "width": 768,
+      "height": 768,
+      "sourceCell": [2, 2]
+    },
+    "race-win": {
+      "path": "public/assets/scenes/race-win.webp",
+      "width": 768,
+      "height": 768,
+      "sourceCell": [0, 0]
+    },
+    "food-win": {
+      "path": "public/assets/scenes/food-win.webp",
+      "width": 768,
+      "height": 768,
+      "sourceCell": [1, 0]
+    },
+    "rocket-win": {
+      "path": "public/assets/scenes/rocket-win.webp",
+      "width": 768,
+      "height": 768,
+      "sourceCell": [2, 0]
+    },
+    "goal-win": {
+      "path": "public/assets/scenes/goal-win.webp",
+      "width": 768,
+      "height": 768,
+      "sourceCell": [0, 1]
+    },
+    "fish-win": {
+      "path": "public/assets/scenes/fish-win.webp",
+      "width": 768,
+      "height": 768,
+      "sourceCell": [1, 1]
+    },
+    "tree-win": {
+      "path": "public/assets/scenes/tree-win.webp",
+      "width": 768,
+      "height": 768,
+      "sourceCell": [2, 1]
+    },
+    "treasure-win": {
+      "path": "public/assets/scenes/treasure-win.webp",
+      "width": 768,
+      "height": 768,
+      "sourceCell": [0, 2]
+    },
+    "pancake-win": {
+      "path": "public/assets/scenes/pancake-win.webp",
+      "width": 768,
+      "height": 768,
+      "sourceCell": [1, 2]
+    },
+    "dino-win": {
+      "path": "public/assets/scenes/dino-win.webp",
+      "width": 768,
+      "height": 768,
+      "sourceCell": [2, 2]
+    }
+  },
+  "objects": {
+    "dog": "public/assets/objects/dog.webp",
+    "cat": "public/assets/objects/cat.webp",
+    "cow": "public/assets/objects/cow.webp",
+    "duck": "public/assets/objects/duck.webp",
+    "rabbit": "public/assets/objects/rabbit.webp",
+    "bear": "public/assets/objects/bear.webp",
+    "lion": "public/assets/objects/lion.webp",
+    "elephant": "public/assets/objects/elephant.webp",
+    "giraffe": "public/assets/objects/giraffe.webp",
+    "monkey": "public/assets/objects/monkey.webp",
+    "horse": "public/assets/objects/horse.webp",
+    "sheep": "public/assets/objects/sheep.webp",
+    "pig": "public/assets/objects/pig.webp",
+    "mouse": "public/assets/objects/mouse.webp",
+    "frog": "public/assets/objects/frog.webp",
+    "turtle": "public/assets/objects/turtle.webp",
+    "fish": "public/assets/objects/fish.webp",
+    "butterfly": "public/assets/objects/butterfly.webp",
+    "bee": "public/assets/objects/bee.webp",
+    "snail": "public/assets/objects/snail.webp",
+    "bird": "public/assets/objects/bird.webp",
+    "rooster": "public/assets/objects/rooster.webp",
+    "penguin": "public/assets/objects/penguin.webp",
+    "sun": "public/assets/objects/sun.webp",
+    "tree": "public/assets/objects/tree.webp",
+    "flower": "public/assets/objects/flower.webp",
+    "star": "public/assets/objects/star.webp",
+    "moon": "public/assets/objects/moon.webp",
+    "cloud": "public/assets/objects/cloud.webp",
+    "rainbow": "public/assets/objects/rainbow.webp",
+    "snowman": "public/assets/objects/snowman.webp",
+    "leaf": "public/assets/objects/leaf.webp",
+    "juice": "public/assets/objects/juice.webp",
+    "sausage": "public/assets/objects/sausage.webp",
+    "banana": "public/assets/objects/banana.webp",
+    "milk": "public/assets/objects/milk.webp",
+    "chocolate": "public/assets/objects/chocolate.webp",
+    "candy": "public/assets/objects/candy.webp",
+    "cake": "public/assets/objects/cake.webp",
+    "apple": "public/assets/objects/apple.webp",
+    "pear": "public/assets/objects/pear.webp",
+    "orange": "public/assets/objects/orange.webp",
+    "lemon": "public/assets/objects/lemon.webp",
+    "strawberry": "public/assets/objects/strawberry.webp",
+    "grapes": "public/assets/objects/grapes.webp",
+    "watermelon": "public/assets/objects/watermelon.webp",
+    "carrot": "public/assets/objects/carrot.webp",
+    "tomato": "public/assets/objects/tomato.webp",
+    "cucumber": "public/assets/objects/cucumber.webp",
+    "bread": "public/assets/objects/bread.webp",
+    "cheese": "public/assets/objects/cheese.webp",
+    "egg": "public/assets/objects/egg.webp",
+    "icecream": "public/assets/objects/icecream.webp",
+    "pizza": "public/assets/objects/pizza.webp",
+    "house": "public/assets/objects/house.webp",
+    "window": "public/assets/objects/window.webp",
+    "clock": "public/assets/objects/clock.webp",
+    "book": "public/assets/objects/book.webp",
+    "umbrella": "public/assets/objects/umbrella.webp",
+    "key": "public/assets/objects/key.webp",
+    "chair": "public/assets/objects/chair.webp",
+    "bed": "public/assets/objects/bed.webp",
+    "cup": "public/assets/objects/cup.webp",
+    "spoon": "public/assets/objects/spoon.webp",
+    "car": "public/assets/objects/car.webp",
+    "bus": "public/assets/objects/bus.webp",
+    "train": "public/assets/objects/train.webp",
+    "plane": "public/assets/objects/plane.webp",
+    "boat": "public/assets/objects/boat.webp",
+    "bicycle": "public/assets/objects/bicycle.webp",
+    "rocket": "public/assets/objects/rocket.webp",
+    "balloon": "public/assets/objects/balloon.webp",
+    "ball": "public/assets/objects/ball.webp",
+    "shoe": "public/assets/objects/shoe.webp",
+    "brush": "public/assets/objects/brush.webp",
+    "pencil": "public/assets/objects/pencil.webp",
+    "scissors": "public/assets/objects/scissors.webp",
+    "hat": "public/assets/objects/hat.webp",
+    "shirt": "public/assets/objects/shirt.webp",
+    "sock": "public/assets/objects/sock.webp",
+    "mitten": "public/assets/objects/mitten.webp",
+    "drum": "public/assets/objects/drum.webp",
+    "guitar": "public/assets/objects/guitar.webp",
+    "kite": "public/assets/objects/kite.webp",
+    "mushroom": "public/assets/objects/mushroom.webp",
+    "shell": "public/assets/objects/shell.webp"
+  },
+  "mealItems": {
+    "chicken": {
+      "path": "public/assets/meal-items/chicken.webp",
+      "width": 384,
+      "height": 384,
+      "sourceCell": [0, 0]
+    },
+    "eggs": {
+      "path": "public/assets/meal-items/eggs.webp",
+      "width": 384,
+      "height": 384,
+      "sourceCell": [1, 0]
+    },
+    "cucumbers": {
+      "path": "public/assets/meal-items/cucumbers.webp",
+      "width": 384,
+      "height": 384,
+      "sourceCell": [2, 0]
+    },
+    "tuna": {
+      "path": "public/assets/meal-items/tuna.webp",
+      "width": 384,
+      "height": 384,
+      "sourceCell": [0, 1]
+    },
+    "milk": {
+      "path": "public/assets/meal-items/milk.webp",
+      "width": 384,
+      "height": 384,
+      "sourceCell": [1, 1]
+    },
+    "frog": {
+      "path": "public/assets/meal-items/frog.webp",
+      "width": 384,
+      "height": 384,
+      "sourceCell": [2, 1]
+    },
+    "worm": {
+      "path": "public/assets/meal-items/worm.webp",
+      "width": 384,
+      "height": 384,
+      "sourceCell": [0, 2]
+    },
+    "can": {
+      "path": "public/assets/meal-items/can.webp",
+      "width": 384,
+      "height": 384,
+      "sourceCell": [1, 2]
+    },
+    "diaper": {
+      "path": "public/assets/meal-items/diaper.webp",
+      "width": 384,
+      "height": 384,
+      "sourceCell": [2, 2]
+    }
+  },
+  "canonicalCharacter": "public/assets/scenes/bar-reference.webp"
+}

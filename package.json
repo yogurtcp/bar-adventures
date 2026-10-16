@@ -1,0 +1,13 @@
+{
+  "name": "bar-adventures",
+  "version": "3.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node --test tests/*.test.js",
+    "build": "node scripts/build-site.mjs",
+    "deploy": "node scripts/deploy-pages.mjs"
+  },
+  "description": "Tablet addition races and subtraction meals for Bar"
+}
