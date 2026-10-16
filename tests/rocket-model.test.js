@@ -4,7 +4,7 @@ import * as journey from "../src/journey-model.js";
 import * as rocket from "../src/rocket-model.js";
 
 test("six familiar stages precede rockets; every subsequent mission follows another race/food pair", () => {
-  assert.equal(journey.STAGE_COUNT, 34);
+  assert.equal(journey.STAGE_COUNT, 44);
   assert.deepEqual(
     journey.STAGES.slice(0, 6).map((s) => s.kind),
     ["race", "food", "race", "food", "race", "food"],
@@ -163,10 +163,10 @@ test("a previously completed final food stage unlocks the newly added last rocke
     completed: Array.from({ length: 24 }, (_, i) => i + 1),
   };
   const next = journey.migrateJourneySave(old);
-  assert.equal(next.unlocked, 34);
-  assert.equal(next.selected, 34);
+  assert.equal(next.unlocked, journey.stageFor("rocket", 10));
+  assert.equal(next.selected, journey.stageFor("rocket", 10));
   assert.equal(next.completed.length, 24);
-  assert.ok(!next.completed.includes(34));
+  assert.ok(!next.completed.includes(journey.stageFor("rocket", 10)));
 });
 
 test("completed legacy race levels unlock their inserted meal without marking it passed", () => {

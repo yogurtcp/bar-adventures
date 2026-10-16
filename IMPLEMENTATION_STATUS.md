@@ -2,7 +2,7 @@
 
 ## Current scope
 
-The current product has one scrolling route with 34 race, food and rocket stages. The first rocket is stage 7, after three complete race/food pairs. Other activities remain hidden. The historical race-only sections below document earlier work; the food update at the end describes the new baseline.
+The current product has one scrolling route with 44 race, food, rocket and pancake café stages. The first rocket is stage 7, after three complete race/food pairs. The first café is stage 8. Other activities remain hidden. The historical race-only sections below document earlier work; the food update at the end describes the new baseline.
 
 ## Implemented
 
@@ -107,3 +107,17 @@ The current product has one scrolling route with 34 race, food and rocket stages
 - Twenty tests pass, including all 2,560 rocket answer histories across ten difficulty levels, early outcomes, equation/choice validity, save restoration, invalid saves, first-six-stage scheduling, and legacy migration. Existing race and food tests still pass.
 - Chrome checks passed for all three rocket choice bands and late-flight cockpit close-ups at 1280×800, 1024×768, 1180×820, 800×1280 and 768×1024. Full eight-question wins and immediate three-mistake losses verified audible feedback, corrected equations, endings, automatic progression and map returns. Normal-mode checks verified food stage 6 → easy rocket 7 → race 8 unlocks, and exact old race/food resume after migration. Screenshots and reports are in `artifacts/rocket-review/`.
 - Static builds version the complete module/CSS directory together to prevent stale cached modules after a public update.
+
+## Pancake café and shared animal reactions — 2026-10-16
+
+- Added ten café stages after rocket missions, starting at stage 8. First six race/food stages and first rocket stage 7 are preserved. Total is 44 stages; temporary debug access still enables all stages.
+- Five animal orders per café; four matching pairs wins. First café uses totals 3–4 and three plates; later cafés gradually reach ten with four plates. Any valid pair/order is accepted; tapping the first plate again undoes. The second plate submits automatically. Five different animals appear per round.
+- Generated three transparent Bar chef poses and six three-frame animal sheets (bunny, fox, panda, kitten, puppy, penguin). All waiting, delighted and surprised frames were visually inspected. Native pancake stacks have exact counts. Correct stacks travel from Bar’s fitted plate to the customer; wrong orders show the actual sum then a worked valid pair. Wrong selections are not shown as correct; the demonstrated pair highlights with its equation. Bar reactions include a large face close-up and a pancake on his chef hat.
+- Animal car buttons show reaction portraits; kitchen and rocket scenes include companions. Café customers, queue and finale animals are tappable. Shared expression/wiggle/voice reactions do not submit, save, change score/position, or reschedule questions. Three voice contours per species use the existing shared master mute/volume.
+- Save version 5 migrates v4/v3 journey and v2 race records by activity/difficulty. Existing completions, best scores and exact unfinished work are preserved; new cafés are not marked complete. Original records remain untouched. Partial café selections survive reload.
+- All 25 automated tests passed, including every café result history at all ten difficulties, every ordered plate pair across 200 seeded rounds, undo/reload, malformed selections and all v4 stage migrations. Existing race/food/rocket tests remain green.
+- Chrome touch checks reviewed both the first and last café at 1280×800, 1024×768, 800×1280, 768×1024, 1024×640 and 1280×720 (12 layouts): no page overflow, all images loaded, every plate target at least 64px, and scene height at least 250px. Screenshots are in ignored `artifacts/cafe-review/`.
+- Completed a full café win and full loss through actual touch input, verified delivery, equation correction, auto-advance, celebration with six animals, map return/completion, loss remaining for replay, clean replay, tutorial, refresh with a first plate selected, and navigation cancellation. The win check completed before a test-harness selector quoting error; the remaining checks were rerun separately and passed.
+- Tested taps in race, food, rocket and café: visible reaction, automatic return to base mood, exact save record unchanged and no runtime exceptions. Offline browser audio rendering checked all 18 voices for distinct, nonzero, unclipped signals. A real animal tap produced output RMS 0.02248; mute reduced output RMS to zero while keeping the visual reaction.
+- Normal-mode browser testing confirmed 43 stages initially locked, first rocket victory unlocking café stage 8 while stage 9 remains locked, and real v4 race/food/rocket migration resumes the right question without rewriting old records.
+- Built static-site browser check passed under `/bar-adventures/` for map, food, rocket and café with content-versioned module imports and local assets. Physical tablet audio/touch remains untested.

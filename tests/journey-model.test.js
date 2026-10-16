@@ -6,7 +6,7 @@ import * as race from "../src/race-model.js";
 test("the familiar race and food stages keep their independent difficulty after rocket insertion", () => {
   for (let stage = 1; stage <= journey.STAGE_COUNT; stage++) {
     const info = journey.stageInfo(stage);
-    if (info.kind === "rocket") continue;
+    if (!["race", "food"].includes(info.kind)) continue;
     for (let seed = 1; seed <= 40; seed++) {
       const r = journey.newRound(stage, seed),
         original = race.newRound(info.level, seed);
@@ -99,22 +99,23 @@ test("race migration preserves exact unfinished work and earned results at the n
 });
 test("malformed food saves are rejected; debug access and completed replays preserve earned progress", () => {
   const s = journey.freshSave();
-  s.selected = 24;
-  s.round = journey.newRound(24, 12);
+  const stage = journey.stageFor("food", 9);
+  s.selected = stage;
+  s.round = journey.newRound(stage, 12);
   assert.equal(journey.normalizeSave(s).round, null);
   assert.equal(
     journey.normalizeSave(s, { unlockAllLevels: true }).round.stage,
-    24,
+    stage,
   );
-  s.unlocked = 24;
+  s.unlocked = stage;
   const changed = structuredClone(s);
   changed.round.tasks[0].answer = 99;
   assert.equal(journey.normalizeSave(changed).round, null);
   const skipped = structuredClone(s);
   skipped.round.index = 2;
   assert.equal(journey.normalizeSave(skipped).round, null);
-  s.completed = [24];
-  s.best[24] = 10;
+  s.completed = [stage];
+  s.best[stage] = 10;
   for (let i = 0; i < 8; i++) {
     s.round.index = i;
     const q = s.round.tasks[i];
@@ -124,6 +125,6 @@ test("malformed food saves are rejected; debug access and completed replays pres
     );
   }
   journey.completeRound(s);
-  assert.deepEqual(s.completed, [24]);
-  assert.equal(s.best[24], 10);
+  assert.deepEqual(s.completed, [stage]);
+  assert.equal(s.best[stage], 10);
 });

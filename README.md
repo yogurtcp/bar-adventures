@@ -1,6 +1,6 @@
 # Bar’s Adventures
 
-The game follows one scrolling route with **34 stages**: twelve addition races, twelve subtraction meals, and ten missing-number rocket missions. The first six stages are race/food pairs; the first rocket is stage 7. Later rockets each follow another race/food pair. Other activities remain hidden.
+The game follows one scrolling route with **44 stages**: twelve addition races, twelve subtraction meals, ten missing-number rocket missions, and ten pancake cafés. The first six stages are race/food pairs; the first rocket is stage 7. The first café is stage 8; later rounds follow race → food → rocket → café. Other activities remain hidden.
 
 **[Play Bar’s Adventures](https://yogurtcp.github.io/bar-adventures/)**
 
@@ -21,7 +21,7 @@ Open **http://localhost:4173**. No dependency installation is needed: runtime us
 
 ## What Bar plays
 
-- The start screen shows the scrolling, numbered 34-stage map, with Bar’s car for races, an egg for meals, and his spaceship for rocket missions. Passed stages have green checkmarks, locked stages have padlocks, and the current stage has a gold highlight with an activity picture and a flag. Tap a stage to play it, or use the large play button to resume the selected stage. Passed stages remain replayable.
+- The start screen shows the scrolling, numbered 44-stage map, with Bar’s car for races, an egg for meals, his spaceship for rocket missions, and a pancake stack for cafés. Passed stages have green checkmarks, locked stages have padlocks, and the current stage has a gold highlight with an activity picture and a flag. Tap a stage to play it, or use the large play button to resume the selected stage. Passed stages remain replayable.
 - Four independent transparent car sprites show Bar, bunny, fox, and panda driving. Their positions are actual saved race progress, animated across four lanes toward a visible finish line.
 - Races use one addition problem at a time. Activity levels 1–3 stay within five and offer two answers; later levels stay within ten and offer three, then four answers.
 - Correct first attempts give a substantial boost. A wrong answer lets the animals gain ground; a successful retry gives Bar a smaller recovery boost. The same question stays visible, rejected choices are disabled, and additional quantity help appears after mistakes.
@@ -42,7 +42,7 @@ Open **http://localhost:4173**. No dependency installation is needed: runtime us
 
 ## Rocket missions
 
-- The first rocket is **stage 7**, after three race/food pairs. Further rocket missions are stages 10, 13, 16, 19, 22, 25, 28, 31 and 34. Rocket difficulty is independent of the race and food difficulty.
+- The first rocket is **stage 7**, after three race/food pairs. Further rocket missions are stages 11, 15, 19, 23, 27, 31, 35, 39 and 43. Rocket difficulty is independent of the race and food difficulty.
 - Mission 1 starts with `□ + 1 = 2`, only two answer choices, totals no larger than three, and a dot frame showing known and missing quantities. Missions 2–3 keep addition and a missing left operand, with totals up to four and five. Mission 4 introduces the missing right operand; missions 5–7 gradually increase addition range and choice count. Only missions 8–10 introduce subtraction. Every value and answer stays between zero and ten.
 - Correct choices fill the actual missing operand, charge a power cell and visibly fly Bar’s rocket to the next of six checkpoints. Mistakes cause a funny engine hiccup and a puzzled cockpit close-up, then show the correct equation and advance. The rocket does not move while the child thinks.
 - Six cells wins immediately; three mistakes ends the mission immediately. There are at most eight questions, with no extra questions after the outcome is settled. Answers auto-advance and no next button is used.
@@ -50,10 +50,23 @@ Open **http://localhost:4173**. No dependency installation is needed: runtime us
 - A win shows Bar planting a moon flag with a tiny alien, then returns to the map. A loss shows a gentle return to Earth with an alien mechanic, with replay/map controls. A separate silent example demonstrates filling the missing box.
 - Five new generated assets and exact prompts are in `public/assets/rocket-v1/` and `art-source/ROCKET_V1_PROMPTS.md`.
 
+## Pancake café
+
+- Cafés are stages **8, 12, 16, 20, 24, 28, 32, 36, 40 and 44**, after rocket missions. Bar wears a chef hat and apron, with ready, delighted/thumbs-up and surprised/pancake-on-hat poses. A large expression close-up appears during feedback.
+- A customer orders a total, shown by both a picture and a number. Tap two distinct plates to combine their pancakes. Any pair making the order is accepted, in either order. Tap the first selected plate again to undo. Two separate plates of two can make four. The second plate automatically submits, with no Serve or Next button.
+- Café 1 uses only totals of three or four and three choices, with countable pancakes and remaining outlines. Later cafés use four plates and gradually reach totals of ten. Each has five orders; four correct orders wins. There is no time limit.
+- Correct stacks combine on Bar’s actual plate, travel to the customer, and disappear as the animal celebrates and munches. Wrong orders wobble, Bar gets a pancake on his hat, and the animal looks surprised. The actual sum appears first, followed by a correct worked pair, then the next order starts automatically.
+- A win brings all six animals together and returns to the map. A loss offers replay and map controls. A silent first-visit example demonstrates choosing two plates. Partial selections survive refresh.
+- Six customers—bunny, fox, panda, kitten, puppy and penguin—each have generated waiting, delighted and surprised poses. Five different customers appear per round. Animals throughout the café, race, kitchen and rocket games are tappable: they wiggle, change expression and make short species-specific cartoon sounds. Taps never change answers, scores, positions or progress. Voices have three variations per species, share mute/volume, and contain no narration.
+- Built-in imagegen assets are saved in `public/assets/cafe-v1/`; exact prompts and provenance are in [`art-source/CAFE_V1_PROMPTS.md`](art-source/CAFE_V1_PROMPTS.md). Pancake stacks are rendered in code so their counts always match the math.
+- Existing stage progress migrates by activity and difficulty, preserving completions, best scores and exact unfinished questions. Newly inserted cafés are not marked passed. Debug and normal records remain separate.
+
 ## Code map
 
+- `src/pancake-model.js`, `src/pancake-view.js`, `src/pancake.css`: pair selection, countable stacks, café customers, serving, reactions and outcomes.
+- `src/animal-view.js`, `src/animals.css`, `src/animal-sound.js`: shared tappable animal poses and locally synthesized voices.
 - `src/app.js`: screens, shared input locking, automatic transitions, map scrolling and persistence.
-- `src/journey-model.js`: activity schedule, v2/v3 save migration, subtraction generation, food rewards, energy and completion.
+- `src/journey-model.js`: activity schedule, v2/v3/v4 save migration, subtraction generation, food rewards, energy and completion.
 - `src/rocket-model.js`, `src/rocket-view.js`, `src/rocket.css`: easy-to-hard missing-number questions, early mission outcomes, flight movement, cockpit reactions and endings.
 - `src/food-view.js`, `src/food.css`: kitchen, food animation, Bar expressions and scrolling map.
 - `public/assets/food-v1/`: five generated Bar sprites; prompts in `art-source/FOOD_V1_PROMPTS.md`.
@@ -75,11 +88,11 @@ Art review: **http://localhost:4173/art-gallery.html**. This adult review page h
 npm test
 ```
 
-The 20 tests cover every eight-answer history for all twelve race and food levels, subtraction choices, double rewards, energy, save recovery, race migration, retries, debug access and retained progress. Rocket tests also cover every answer history at all ten difficulties, early stopping, migration, and the six-stage prerequisite. See `IMPLEMENTATION_STATUS.md` for actual browser checks and remaining limitations.
+The 25 tests cover every eight-answer history for all twelve race and food levels, subtraction choices, double rewards, energy, save recovery, race migration, retries, debug access and retained progress. Rocket tests also cover every answer history at all ten difficulties, early stopping, migration, the six-stage prerequisite, all café answer histories, every plate pair, selection undo/reload, tampered café saves and v4 migration. See `IMPLEMENTATION_STATUS.md` for actual browser checks and remaining limitations.
 
 ## Temporary debug access
 
-All 34 stages are currently playable for review. `DEBUG_UNLOCK_ALL_LEVELS` in `src/config.js` is enabled. Set it to `false` and refresh to restore earned locks. Debug sessions save separately under `bar-journey-v4-debug`; normal adventure progress uses `bar-journey-v4`. Previous v3 adventure and v2 race records are retained for migration and left untouched.
+All 44 stages are currently playable for review. `DEBUG_UNLOCK_ALL_LEVELS` in `src/config.js` is enabled. Set it to `false` and refresh to restore earned locks. Debug sessions save separately under `bar-journey-v5-debug`; normal adventure progress uses `bar-journey-v5`. Previous v4/v3 adventure and v2 race records are retained for migration and left untouched.
 
 ## Answer sounds
 

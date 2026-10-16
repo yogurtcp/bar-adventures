@@ -1,7 +1,11 @@
+import { renderAnimal } from "./animal-sound.js";
 import { createEndingPicker, renderEnding } from "./race-endings.js";
 import { renderEww } from "./food-sound.js";
 
 // Short, nonverbal sounds only. One shared master makes mute immediate.
+let animalBus,
+  animalSources = [],
+  animalVariation = 0;
 let context;
 let master;
 let noise;
@@ -91,6 +95,30 @@ export function playSound(kind, options) {
       source.start(now);
       source.stop(now + length + 0.02);
     };
+    if (kind.startsWith("animal:")) {
+      if (animalBus) {
+        const old = animalBus;
+        old.gain.setTargetAtTime(0, now, 0.008);
+        for (const source of animalSources) {
+          try {
+            source.stop(now + 0.04);
+          } catch {}
+        }
+        setTimeout(() => old.disconnect(), 100);
+      }
+      animalBus = context.createGain();
+      animalBus.connect(master);
+      const [, id, mood] = kind.split(":");
+      animalSources = renderAnimal(
+        context,
+        animalBus,
+        id,
+        now + 0.01,
+        animalVariation++ % 3,
+        mood === "surprised",
+      );
+      return { id: `animal-${id}`, label: id };
+    }
     if (kind === "eww") {
       // Let the vowel sound stand out from the musical wrong-answer feedback.
       if (endingBus) {

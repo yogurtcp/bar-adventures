@@ -1,3 +1,10 @@
+import {
+  makePancakeQuestions,
+  submitPancake,
+  pancakeScore,
+  PANCAKE_GOAL,
+  validPancakeRound,
+} from "./pancake-model.js";
 import * as race from "./race-model.js";
 import {
   makeRocketQuestions,
@@ -7,13 +14,17 @@ import {
   validRocketRound,
 } from "./rocket-model.js";
 
-export const SAVE_KEY = "bar-journey-v4";
+export const SAVE_KEY = "bar-journey-v5";
 export const FOOD_GOAL = 7;
 // Build confidence with three complete race/food pairs before the first rocket.
 export const STAGES = [];
 for (let level = 1; level <= 12; level++) {
   STAGES.push({ kind: "race", level }, { kind: "food", level });
-  if (level >= 3) STAGES.push({ kind: "rocket", level: level - 2 });
+  if (level >= 3)
+    STAGES.push(
+      { kind: "rocket", level: level - 2 },
+      { kind: "pancake", level: level - 2 },
+    );
 }
 export const STAGE_COUNT = STAGES.length;
 export const stageInfo = (stage) => ({ stage, ...STAGES[stage - 1] });
@@ -62,15 +73,19 @@ export function foodProgress(round) {
   };
 }
 export function wonRound(round) {
-  return round.kind === "rocket"
-    ? rocketProgress(round).cells >= ROCKET_GOAL
-    : round.kind === "food"
-      ? foodProgress(round).points >= FOOD_GOAL
-      : race.score(round) >= race.WIN_SCORE;
+  return round.kind === "pancake"
+    ? pancakeScore(round) >= PANCAKE_GOAL
+    : round.kind === "rocket"
+      ? rocketProgress(round).cells >= ROCKET_GOAL
+      : round.kind === "food"
+        ? foodProgress(round).points >= FOOD_GOAL
+        : race.score(round) >= race.WIN_SCORE;
 }
 export function newRound(stage, seed) {
   const info = stageInfo(stage);
   const round = { ...race.newRound(info.level, seed), ...info };
+  if (info.kind === "pancake")
+    round.tasks = makePancakeQuestions(info.level, round.seed);
   if (info.kind === "rocket")
     round.tasks = makeRocketQuestions(info.level, round.seed);
   if (info.kind === "food") {
@@ -100,6 +115,7 @@ export function newRound(stage, seed) {
   return round;
 }
 export function submit(round, value) {
+  if (round.kind === "pancake") return submitPancake(round, value);
   if (round.kind === "rocket") return submitRocket(round, value);
   if (round.kind !== "food") return race.submit(round, value);
   const q = round.tasks[round.index];
@@ -115,20 +131,23 @@ export function submit(round, value) {
 export function freshSave() {
   return {
     ...race.freshSave(),
-    version: 4,
+    version: 5,
     taughtFood: false,
     taughtRocket: false,
+    taughtPancake: false,
   };
 }
 export function completeRound(save) {
   const r = save.round;
   if (!r || r.status !== "finished") return;
   const points =
-    r.kind === "rocket"
-      ? rocketProgress(r).cells
-      : r.kind === "food"
-        ? foodProgress(r).points
-        : race.score(r);
+    r.kind === "pancake"
+      ? pancakeScore(r)
+      : r.kind === "rocket"
+        ? rocketProgress(r).cells
+        : r.kind === "food"
+          ? foodProgress(r).points
+          : race.score(r);
   save.best[r.stage] = Math.max(save.best[r.stage] || 0, points);
   if (wonRound(r)) {
     if (!save.completed.includes(r.stage)) save.completed.push(r.stage);
@@ -148,7 +167,7 @@ export function migrateRaceSave(raw, options) {
   return normalizeSave(
     {
       ...old,
-      version: 4,
+      version: 5,
       unlocked,
       selected:
         (!old.round || old.round.status === "finished") &&
@@ -168,14 +187,22 @@ export function migrateRaceSave(raw, options) {
   );
 }
 export function migrateJourneySave(raw, options) {
-  if (!raw || raw.version !== 3) return freshSave();
+  if (!raw || ![3, 4].includes(raw.version)) return freshSave();
+  const oldStages =
+    raw.version === 4
+      ? STAGES.filter((s) => s.kind !== "pancake")
+      : Array.from({ length: 24 }, (_, i) => ({
+          kind: i % 2 ? "food" : "race",
+          level: Math.floor(i / 2) + 1,
+        }));
+  const oldCount = oldStages.length;
   const map = (n) =>
-    Number.isInteger(n) && n >= 1 && n <= 24
-      ? stageFor(n % 2 ? "race" : "food", Math.ceil(n / 2))
+    Number.isInteger(n) && n >= 1 && n <= oldCount
+      ? stageFor(oldStages[n - 1].kind, oldStages[n - 1].level)
       : 1;
   const completed = Array.isArray(raw.completed)
     ? raw.completed
-        .filter((n) => Number.isInteger(n) && n >= 1 && n <= 24)
+        .filter((n) => Number.isInteger(n) && n >= 1 && n <= oldCount)
         .map(map)
     : [];
   const unlocked = Math.max(
@@ -185,7 +212,7 @@ export function migrateJourneySave(raw, options) {
   return normalizeSave(
     {
       ...raw,
-      version: 4,
+      version: 5,
       unlocked,
       selected:
         (!raw.round || raw.round.status === "finished") &&
@@ -197,7 +224,7 @@ export function migrateJourneySave(raw, options) {
       completed,
       best: Object.fromEntries(
         Object.entries(raw.best || {})
-          .filter(([n]) => Number.isInteger(+n) && +n >= 1 && +n <= 24)
+          .filter(([n]) => Number.isInteger(+n) && +n >= 1 && +n <= oldCount)
           .map(([n, v]) => [map(+n), v]),
       ),
       round: raw.round ? { ...raw.round, stage: map(raw.round.stage) } : null,
@@ -207,7 +234,7 @@ export function migrateJourneySave(raw, options) {
 }
 export function normalizeSave(raw, { unlockAllLevels = false } = {}) {
   const save = freshSave();
-  if (!raw || raw.version !== 4) return save;
+  if (!raw || raw.version !== 5) return save;
   const bounded = (n, lo, hi) => Number.isInteger(n) && n >= lo && n <= hi;
   save.unlocked = bounded(raw.unlocked, 1, STAGE_COUNT) ? raw.unlocked : 1;
   const limit = unlockAllLevels ? STAGE_COUNT : save.unlocked;
@@ -224,11 +251,13 @@ export function normalizeSave(raw, { unlockAllLevels = false } = {}) {
         bounded(
           v,
           0,
-          stageInfo(+n).kind === "food"
-            ? 10
-            : stageInfo(+n).kind === "rocket"
-              ? 6
-              : 8,
+          stageInfo(+n).kind === "pancake"
+            ? 5
+            : stageInfo(+n).kind === "food"
+              ? 10
+              : stageInfo(+n).kind === "rocket"
+                ? 6
+                : 8,
         )
       )
         save.best[n] = v;
@@ -242,6 +271,7 @@ export function normalizeSave(raw, { unlockAllLevels = false } = {}) {
   save.taught = raw.taught === true;
   save.taughtFood = raw.taughtFood === true;
   save.taughtRocket = raw.taughtRocket === true;
+  save.taughtPancake = raw.taughtPancake === true;
   const r = raw.round;
   if (
     !r ||
@@ -257,9 +287,14 @@ export function normalizeSave(raw, { unlockAllLevels = false } = {}) {
     r.level !== info.level ||
     r.kind !== info.kind ||
     !Array.isArray(r.tasks) ||
-    r.tasks.length !== 8
+    r.tasks.length !== (info.kind === "pancake" ? 5 : 8) ||
+    r.index >= r.tasks.length
   )
     return save;
+  if (info.kind === "pancake") {
+    if (validPancakeRound(r)) save.round = r;
+    return save;
+  }
   if (info.kind === "rocket") {
     if (validRocketRound(r)) save.round = r;
     return save;

@@ -1,0 +1,809 @@
+/* Countable pancakes stay native so every illustrated stack matches the math. */
+.pancake-stack {
+  position: relative;
+  display: inline-block;
+  width: 90px;
+  height: 100px;
+  flex: none;
+  vertical-align: bottom;
+}
+.pancake-stack > i {
+  position: absolute;
+  width: 68px;
+  height: 13px;
+  bottom: calc(9px + var(--p) * 8px);
+  left: 11px;
+  border: 3px solid #b97539;
+  border-top-color: #f9d88d;
+  border-radius: 45%;
+  background: #eeb465;
+  box-shadow: inset 0 -2px #d38d47;
+  z-index: calc(2 + var(--p));
+}
+.pancake-stack > i:last-of-type:after {
+  content: "";
+  position: absolute;
+  left: 25px;
+  top: -4px;
+  width: 14px;
+  height: 7px;
+  background: #fff1a6;
+  border: 2px solid #f4d65b;
+  transform: rotate(-7deg);
+}
+.pancake-plate {
+  position: absolute;
+  bottom: 1px;
+  left: 0;
+  width: 90px;
+  height: 17px;
+  border-radius: 50%;
+  border: 3px solid #a5c1c0;
+  background: #f2ffff;
+  box-shadow: 0 4px 0 #7c9b9c33;
+}
+.cafe-stage {
+  position: relative;
+  flex: 1;
+  min-height: 250px;
+  isolation: isolate;
+  overflow: hidden;
+  border: 1px solid #dfcfb4;
+  border-radius: 24px;
+  background: #f5e5cd;
+}
+.cafe-wall {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: repeating-linear-gradient(
+    90deg,
+    #f4dfbf 0 46px,
+    #f8e8cf 46px 48px
+  );
+}
+.cafe-awning {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 37px;
+  background: repeating-linear-gradient(
+    90deg,
+    #d98f7a 0 65px,
+    #fff0cd 65px 130px
+  );
+  border-bottom: 8px solid #b9695c;
+  border-radius: 0 0 16px 16px;
+  box-shadow: 0 5px #b9695c22;
+}
+.cafe-window {
+  position: absolute;
+  left: 6%;
+  top: 19%;
+  width: 24%;
+  height: 44%;
+  border: 9px solid #b58760;
+  border-radius: 70px 70px 8px 8px;
+  background: linear-gradient(#a9d6d7 0 68%, #9abf85 68%);
+  box-shadow:
+    0 4px #fff6dc,
+    inset 0 0 0 4px #e4b991;
+}
+.cafe-window:after,
+.cafe-window:before {
+  content: "";
+  position: absolute;
+  background: #b58760;
+}
+.cafe-window:after {
+  width: 7px;
+  top: 0;
+  bottom: 0;
+  left: 48%;
+}
+.cafe-window:before {
+  height: 7px;
+  top: 55%;
+  left: 0;
+  right: 0;
+}
+.cafe-shelf {
+  position: absolute;
+  top: 32%;
+  right: 5%;
+  width: 31%;
+  height: 12px;
+  background: #b4825b;
+  border-bottom: 4px solid #936241;
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-end;
+}
+.cafe-shelf i {
+  width: 25px;
+  height: 33px;
+  background: #d99274;
+  border: 4px solid #f4caa3;
+  border-radius: 6px 6px 2px 2px;
+  margin-bottom: 12px;
+}
+.cafe-shelf i:nth-child(2) {
+  height: 45px;
+  background: #98b49c;
+}
+.cafe-shelf i:nth-child(3) {
+  background: #b6a2b9;
+}
+.cafe-counter {
+  position: absolute;
+  bottom: 10%;
+  left: 0;
+  right: 0;
+  height: 23%;
+  background: repeating-linear-gradient(
+    90deg,
+    #a87c58 0 70px,
+    #98704f 70px 73px
+  );
+  border-top: 15px solid #d7ad7d;
+  box-shadow:
+    0 -4px #f4d7ac,
+    0 5px #835f43;
+}
+.cafe-floor {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 10%;
+  background: repeating-conic-gradient(#dfc6a4 0 25%, #ead6b9 0 50%) 0 0/50px
+    50px;
+}
+.cafe-goal {
+  position: absolute;
+  left: 18px;
+  top: 48px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 8;
+  padding: 9px 13px;
+  border-radius: 14px;
+  background: #fffaf0e8;
+  box-shadow: 0 3px #b18b6033;
+}
+.cafe-goal > span {
+  color: #dfd3c0;
+}
+.cafe-goal .earned {
+  color: #dc806e;
+}
+.bar-chef {
+  position: absolute;
+  left: 24%;
+  bottom: 7%;
+  width: 33%;
+  height: 86%;
+  z-index: 3;
+}
+.bar-chef img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+.cafe-customer {
+  position: absolute;
+  right: 10%;
+  bottom: 17%;
+  width: clamp(140px, 21vw, 240px);
+  height: clamp(140px, 21vw, 240px);
+  z-index: 4;
+}
+.cafe-order {
+  position: absolute;
+  right: 11%;
+  top: 11%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 14px 6px 3px;
+  background: #fffaf0;
+  border: 3px solid #e4c39d;
+  border-radius: 24px;
+  z-index: 6;
+  box-shadow: 0 4px #a27e4930;
+}
+.cafe-order:after {
+  content: "";
+  position: absolute;
+  width: 17px;
+  height: 17px;
+  bottom: -11px;
+  left: 48%;
+  transform: rotate(45deg);
+  background: #fffaf0;
+  border-right: 3px solid #e4c39d;
+  border-bottom: 3px solid #e4c39d;
+}
+.cafe-order b {
+  font-size: 46px;
+}
+.cafe-order .pancake-stack {
+  height: 95px;
+  transform: scale(0.85);
+  transform-origin: bottom center;
+  margin-left: -2px;
+  margin-right: -10px;
+}
+.customer-table {
+  position: absolute;
+  right: 6%;
+  bottom: 18%;
+  width: 27%;
+  height: 18px;
+  border-radius: 50%;
+  background: #d7ad7d;
+  border-bottom: 6px solid #9d704d;
+  z-index: 5;
+}
+.chef-serving {
+  position: absolute;
+  left: 43%;
+  bottom: 37%;
+  z-index: 6;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+.chef-serving > .pancake-stack {
+  filter: drop-shadow(0 4px 1px #4e361a33);
+}
+
+.cafe-queue {
+  position: absolute;
+  left: 3%;
+  bottom: 5%;
+  display: flex;
+  gap: 2px;
+  z-index: 7;
+}
+.queued-animal {
+  width: 70px;
+  height: 70px;
+  filter: saturate(0.85);
+}
+.delivering {
+  animation: pancake-deliver 2.6s ease-in-out both;
+}
+.wobbling {
+  animation: pancake-wobble 0.25s ease-in-out 4;
+}
+.chef-reacting {
+  animation: chef-cheer 0.45s ease-in-out 2;
+}
+
+@keyframes chef-cheer {
+  50% {
+    transform: translateY(-10px);
+  }
+}
+.customer-hearts {
+  position: absolute;
+  right: 13%;
+  bottom: 58%;
+  color: #d87777;
+  font-size: 36px;
+  z-index: 8;
+  pointer-events: none;
+  animation: animal-pop 2.6s ease-out both;
+}
+.cafe-dock {
+  position: relative;
+  flex: none;
+  min-height: 235px;
+  padding: 12px 24px 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 1px solid #e6dccc;
+  border-radius: 22px;
+  background: #fffdf6;
+  box-shadow: 0 4px 0 #e8e0ce;
+}
+.cafe-equations {
+  display: grid;
+  place-items: center;
+  min-height: 50px;
+}
+.cafe-equation,
+.cafe-correction {
+  grid-area: 1/1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  font-size: 40px;
+  line-height: 1.1;
+  font-weight: 900;
+}
+.cafe-equation > span {
+  min-width: 38px;
+  text-align: center;
+}
+.cafe-equation > b,
+.cafe-correction > b {
+  font-size: 29px;
+  color: #9a9d8c;
+}
+.cafe-equation > .icon,
+.cafe-correction > .icon {
+  color: #4a8d65;
+  width: 31px;
+  height: 31px;
+}
+.wrong-sum > .icon {
+  color: #cc806a;
+}
+.wrong-sum {
+  animation: cafe-wrong-sum 3.1s linear both;
+}
+.cafe-correction {
+  color: #4a8d65;
+  animation: cafe-correct-sum 3.1s linear both;
+}
+@keyframes cafe-wrong-sum {
+  0%,
+  30% {
+    opacity: 1;
+  }
+  38%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes cafe-correct-sum {
+  0%,
+  33% {
+    opacity: 0;
+  }
+  42%,
+  100% {
+    opacity: 1;
+  }
+}
+.pancake-choices {
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  gap: 16px;
+  width: 100%;
+  max-width: 760px;
+}
+.pancake-choice {
+  position: relative;
+  flex: 1;
+  max-width: 160px;
+  height: 143px;
+  border: 3px solid #e7d5b8;
+  border-bottom-width: 6px;
+  border-radius: 20px;
+  background: #fcf4e3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 4px 8px 6px;
+  transition:
+    background 0.15s,
+    transform 0.15s,
+    border-color 0.15s;
+}
+.pancake-choice .pancake-stack {
+  height: 97px;
+}
+.pancake-choice > b {
+  font-size: 27px;
+  line-height: 1.1;
+}
+.pancake-choice.selected {
+  border-color: #62a18a;
+  background: #e4f2dc;
+  transform: translateY(-5px);
+}
+.pancake-choice .plate-check {
+  position: absolute;
+  right: 6px;
+  top: 6px;
+  display: none;
+  color: #4a8d65;
+}
+.pancake-choice.selected .plate-check {
+  display: block;
+}
+.pancake-choice:disabled {
+  opacity: 1;
+}
+.cafe-party {
+  position: absolute;
+  left: 5%;
+  right: 5%;
+  bottom: 3%;
+  z-index: 8;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 8px;
+}
+.party-animal {
+  width: clamp(70px, 12vw, 135px);
+  height: clamp(70px, 12vw, 135px);
+}
+.cafe-finale .bar-chef {
+  left: 33%;
+  width: 34%;
+  bottom: 15%;
+}
+.cafe-result .cafe-stage {
+  width: 100%;
+  min-height: 0;
+}
+.activity-pancake .node-picture > .pancake-stack,
+.selected-activity > .pancake-stack {
+  transform: scale(0.7);
+  height: 85px;
+  margin-top: -25px;
+  margin-bottom: -15px;
+}
+.activity-pancake {
+  background: #fff2d8;
+}
+.brand-symbol.cafe-brand:after {
+  display: none;
+}
+.brand-symbol > .pancake-stack {
+  transform: scale(0.55);
+  margin-top: -30px;
+}
+.cafe-example .example-options {
+  gap: 20px;
+}
+.example-plate {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 5px 9px;
+  background: #fcf4e3;
+  border: 3px solid #e7d5b8;
+  border-radius: 18px;
+}
+.example-plate.chosen {
+  border-color: #62a18a;
+  background: #e4f2dc;
+}
+.example-plate > b {
+  font-size: 24px;
+}
+.cafe-demo-customer {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  height: 150px;
+}
+.cafe-demo-customer > .animal-button {
+  width: 135px;
+  height: 135px;
+}
+.cafe-demo-customer > .pancake-stack {
+  margin-left: -30px;
+}
+.reduce-motion .delivering,
+.reduce-motion .wobbling,
+.reduce-motion .chef-reacting {
+  animation: none;
+}
+.reduce-motion .delivering {
+  left: 80%;
+  bottom: 22%;
+  transform: translateX(-50%);
+}
+@media (orientation: portrait) {
+  .cafe-dock {
+    min-height: 270px;
+    padding: 18px 18px 22px;
+    gap: 18px;
+  }
+  .pancake-choice {
+    height: 155px;
+  }
+  .bar-chef {
+    left: 17%;
+    width: 43%;
+    height: 80%;
+    bottom: 8%;
+  }
+  .cafe-customer {
+    right: 7%;
+    bottom: 20%;
+    width: 30vw;
+    height: 30vw;
+    max-width: 240px;
+    max-height: 240px;
+  }
+  .cafe-order {
+    top: 17%;
+    right: 8%;
+  }
+  .chef-serving {
+    left: 42%;
+    bottom: 35%;
+  }
+  .cafe-window {
+    top: 27%;
+    height: 38%;
+  }
+  .cafe-shelf {
+    top: 39%;
+  }
+  .cafe-goal {
+    top: 51px;
+  }
+  .cafe-queue {
+    bottom: 5%;
+  }
+  .cafe-counter {
+    bottom: 11%;
+    height: 23%;
+  }
+  .cafe-floor {
+    height: 11%;
+  }
+  .customer-table {
+    bottom: 21%;
+    right: 4%;
+    width: 34%;
+  }
+  .cafe-finale .bar-chef {
+    width: 50%;
+    left: 25%;
+    bottom: 14%;
+  }
+}
+@media (max-height: 700px) and (orientation: landscape) {
+  .cafe-dock {
+    min-height: 202px;
+    padding: 8px 20px;
+    gap: 5px;
+  }
+  .pancake-choice {
+    height: 130px;
+  }
+  .pancake-choice .pancake-stack {
+    height: 88px;
+  }
+  .cafe-equation,
+  .cafe-correction {
+    font-size: 33px;
+  }
+  .cafe-equations {
+    min-height: 40px;
+  }
+  .cafe-customer {
+    width: 145px;
+    height: 145px;
+  }
+  .cafe-order {
+    top: 13%;
+    transform: scale(0.8);
+    transform-origin: right top;
+  }
+  .cafe-goal {
+    top: 43px;
+    padding: 5px 9px;
+  }
+  .queued-animal {
+    width: 55px;
+    height: 55px;
+  }
+}
+@media (max-width: 600px) {
+  .cafe-dock {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+  .pancake-choices {
+    gap: 7px;
+  }
+  .pancake-choice {
+    padding-left: 0;
+    padding-right: 0;
+  }
+  .pancake-choice .pancake-stack {
+    transform: scale(0.85);
+  }
+  .cafe-goal {
+    gap: 4px;
+    left: 10px;
+  }
+  .cafe-order {
+    transform: scale(0.8);
+    transform-origin: right top;
+  }
+  .cafe-equation,
+  .cafe-correction {
+    gap: 10px;
+  }
+}
+
+/* Align the real stack to the plate in the fitted chef image. */
+.chef-serving {
+  left: var(--serve-x, 43%);
+  top: var(--serve-y, 60%);
+  bottom: auto;
+  transform: translate(-50%, -100%) scale(var(--serve-scale, 1));
+  transform-origin: 50% 100%;
+}
+.chef-serving > .pancake-stack > .pancake-plate {
+  visibility: hidden;
+}
+
+.delivering .pancake-plate {
+  visibility: visible !important;
+}
+@keyframes pancake-deliver {
+  0%,
+  12% {
+    left: var(--serve-x);
+    top: var(--serve-y);
+    transform: translate(-50%, -100%) scale(var(--serve-scale, 1));
+  }
+  40%,
+  72% {
+    left: var(--customer-x);
+    top: var(--customer-y);
+    transform: translate(-50%, -100%) scale(1);
+  }
+  85%,
+  100% {
+    left: var(--customer-x);
+    top: calc(var(--customer-y) - 20px);
+    transform: translate(-50%, -100%) scale(0.1);
+    opacity: 0;
+  }
+}
+@keyframes pancake-wobble {
+  25% {
+    transform: translate(-50%, -100%) rotate(-12deg)
+      scale(var(--serve-scale, 1));
+  }
+  75% {
+    transform: translate(-50%, -100%) rotate(12deg) scale(var(--serve-scale, 1));
+  }
+}
+.reduce-motion .delivering {
+  left: var(--customer-x);
+  top: var(--customer-y);
+  bottom: auto;
+  transform: translate(-50%, -100%);
+}
+
+.chef-serving > .ghost-stack {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  opacity: 0.5;
+  filter: none;
+  z-index: -1;
+}
+.chef-serving > .ghost-stack > i {
+  border: 2px dashed #a67844;
+  background: #fff9;
+  box-shadow: none;
+}
+.chef-serving > .ghost-stack > i:after {
+  display: none;
+}
+.chef-portrait {
+  position: absolute;
+  left: 6%;
+  top: 29%;
+  width: clamp(140px, 15vw, 190px);
+  aspect-ratio: 1;
+  overflow: hidden;
+  border: 5px solid #fffaf0;
+  border-radius: 50%;
+  background: #ffeabf;
+  box-shadow: 0 5px 0 #9c79553b;
+  z-index: 10;
+  pointer-events: none;
+  animation: chef-portrait-in 0.3s ease-out both;
+}
+.chef-portrait img {
+  position: absolute;
+  height: 340%;
+  width: auto;
+  max-width: none;
+  left: 50%;
+  top: -50%;
+  transform: translateX(-50%);
+  image-rendering: pixelated;
+}
+.chef-portrait.wrong {
+  background: #fce2ce;
+}
+@keyframes chef-portrait-in {
+  from {
+    opacity: 0;
+    transform: scale(0.5) rotate(-12deg);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) rotate(-4deg);
+  }
+}
+@media (orientation: portrait) {
+  .chef-portrait {
+    left: 4%;
+    top: 43%;
+    width: clamp(130px, 20vw, 180px);
+  }
+}
+.reduce-motion .chef-portrait {
+  animation: none;
+}
+
+@media (orientation: portrait) {
+  .cafe-order {
+    top: auto;
+    bottom: calc(20% + min(30vw, 240px) - 24px);
+  }
+}
+.cafe-correct .cafe-customer > .animal-sprite {
+  animation: animal-munch 0.2s ease-in-out 7 0.95s;
+}
+@keyframes animal-munch {
+  50% {
+    transform: translateY(-5px) scale(1.035, 0.97);
+  }
+}
+.reduce-motion .cafe-correct .cafe-customer > .animal-sprite {
+  animation: none;
+}
+
+.wrong-sum {
+  color: #ba7664;
+}
+.pancake-choice.worked-pair {
+  animation: worked-plate 3.1s linear both;
+}
+.pancake-choice.worked-pair .plate-check {
+  display: block;
+  animation: worked-check 3.1s linear both;
+}
+@keyframes worked-plate {
+  0%,
+  33% {
+    border-color: #e7d5b8;
+    background: #fcf4e3;
+    transform: none;
+  }
+  42%,
+  100% {
+    border-color: #62a18a;
+    background: #e4f2dc;
+    transform: translateY(-5px);
+  }
+}
+@keyframes worked-check {
+  0%,
+  33% {
+    opacity: 0;
+  }
+  42%,
+  100% {
+    opacity: 1;
+  }
+}

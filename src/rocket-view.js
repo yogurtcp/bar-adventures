@@ -1,3 +1,4 @@
+import { animalButton } from "./animal-view.js";
 import { icon } from "./race-art.js";
 import {
   rocketProgress,
@@ -47,7 +48,7 @@ export function rocketScene(
         : "ship";
   const pts = FLIGHT_POINTS.map((p) => `${p.x * 10},${p.y * 5}`).join(" ");
   return `<section class="rocket-stage ${feedback ? "rocket-" + feedback : ""} ${finishing ? "rocket-finishing" : ""}" data-cells="${progress.cells}" data-mistakes="${progress.mistakes}" aria-label="Rocket journey: ${progress.cells} of ${ROCKET_GOAL} power cells, ${progress.mistakes} of ${ROCKET_MISTAKES} engine mishaps">
- ${spaceBackground(round.level)}
+ ${spaceBackground(round.level)}${animalButton(round.level % 2 ? "penguin" : "dog", "rocket-companion")}
  <svg class="flight-path" viewBox="0 0 1000 500" preserveAspectRatio="none" aria-hidden="true"><polyline points="${pts}" fill="none" stroke="#b8c6ec44" stroke-width="3" stroke-dasharray="7 10"/></svg>
  ${FLIGHT_POINTS.slice(1)
    .map(
