@@ -1,0 +1,796 @@
+/* One shared, scrollable adventure route. */
+.journey-route {
+  min-height: 0;
+}
+.route-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  scrollbar-color: #8ba17c #e5edcf;
+  scrollbar-width: auto;
+}
+.journey-route .route-map {
+  flex: none;
+  min-height: 0;
+  margin: 0;
+  width: 100%;
+}
+.journey-route .level-node {
+  width: 116px;
+  height: 105px;
+  border-radius: 30px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0;
+  outline-offset: 3px;
+}
+.node-picture {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 66px;
+}
+.node-picture img {
+  width: 95px;
+  height: 68px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  pointer-events: none;
+}
+.activity-food .node-picture img {
+  width: 62px;
+  height: 62px;
+}
+.journey-route .level-node b {
+  position: absolute;
+  top: calc(100% - 12px);
+  background: #fffbed;
+  color: #47614f;
+  min-width: 42px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 13px;
+  font-size: 23px;
+  box-shadow: 0 3px #aabb9366;
+}
+.journey-route .activity-food {
+  background: #f4dfc2;
+}
+.journey-route .level-node.complete {
+  background: #83b48a;
+}
+.journey-route .level-node.locked {
+  background: #d6dccb;
+}
+.journey-route .level-node.locked .node-picture {
+  opacity: 0.45;
+  filter: grayscale(0.7);
+}
+.journey-route .level-node.current {
+  background: #fff0b3;
+}
+.journey-route .current-stage-marker {
+  width: 35px;
+  height: 36px;
+  bottom: auto;
+  top: -19px;
+  left: auto;
+  right: -19px;
+  transform: none;
+  background: #eab856;
+  border: 3px solid #fff9e5;
+  border-radius: 50%;
+  justify-content: center;
+}
+.journey-route .current-stage-marker > .icon {
+  width: 21px;
+  height: 23px;
+  color: #6e512e;
+}
+.journey-route .node-check,
+.journey-route .node-lock {
+  bottom: auto;
+  top: -13px;
+  right: -13px;
+}
+.map-scroll-hint {
+  position: absolute;
+  bottom: 10px;
+  left: calc(50% - 20px);
+  width: 40px;
+  height: 34px;
+  border-radius: 14px;
+  background: #fffcdfed;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 3px 8px #50614925;
+  pointer-events: none;
+}
+.map-scroll-hint .icon {
+  transform: rotate(90deg);
+}
+.at-bottom .map-scroll-hint {
+  opacity: 0;
+}
+.home-screen .start-dock {
+  flex: 0 0 104px;
+  height: 104px;
+  gap: clamp(30px, 8vw, 110px);
+}
+.selected-activity {
+  position: relative;
+  width: 112px;
+  height: 85px;
+  display: grid;
+  place-items: center;
+}
+.selected-activity img {
+  width: 105px;
+  height: 75px;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+.selected-activity b {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  background: #fffdf4;
+  border-radius: 12px;
+  padding: 3px 10px;
+  font-size: 23px;
+}
+.food-brand:after {
+  display: none;
+}
+.food-brand > .icon {
+  width: 44px;
+  height: 44px;
+  color: #b9834b;
+}
+/* The kitchen is one scene, with the same question dock as the race. */
+.food-stage {
+  position: relative;
+  flex: 1;
+  min-height: 290px;
+  border: 5px solid #fffdf3;
+  border-radius: 29px;
+  overflow: hidden;
+  background: #faeacf;
+  box-shadow: 0 5px #e3decf;
+  isolation: isolate;
+}
+.kitchen-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(90deg, #f6e5c9 49%, #efddbc 49% 51%, #f6e5c9 51%);
+  background-size: 90px 100%;
+}
+.kitchen-window {
+  position: absolute;
+  top: 13%;
+  left: 6%;
+  width: 24%;
+  height: 46%;
+  border: 11px solid #bf956e;
+  box-shadow: 0 5px #d7b894;
+  border-radius: 7px;
+  background: linear-gradient(#b6dfec 0 58%, #bdd8a2 58% 75%, #91b57e 75%);
+}
+.kitchen-window:before,
+.kitchen-window:after {
+  content: "";
+  position: absolute;
+  background: #d1aa7d;
+}
+.kitchen-window:before {
+  left: 47%;
+  top: 0;
+  bottom: 0;
+  width: 7px;
+}
+.kitchen-window:after {
+  left: 0;
+  right: 0;
+  height: 7px;
+  top: 48%;
+}
+.kitchen-window i:first-child {
+  position: absolute;
+  top: 12%;
+  left: 16%;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #ffe4a4;
+  box-shadow: 0 0 0 9px #ffe9b644;
+}
+.kitchen-window i:last-child {
+  position: absolute;
+  top: 25%;
+  right: 8%;
+  width: 26%;
+  height: 10%;
+  background: #fff9ea;
+  box-shadow:
+    -12px 6px #fff9ea,
+    8px 6px #fff9ea;
+}
+.kitchen-shelf {
+  position: absolute;
+  right: 6%;
+  top: 17%;
+  display: flex;
+  width: 22%;
+  justify-content: space-evenly;
+  border-bottom: 11px solid #bc926b;
+  padding-bottom: 4px;
+}
+.kitchen-shelf img {
+  width: 28%;
+  max-height: 68px;
+  object-fit: contain;
+  opacity: 0.85;
+}
+.kitchen-tiles {
+  position: absolute;
+  bottom: 19%;
+  height: 22%;
+  width: 100%;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 65px, #e8c7a8 65px 69px),
+    repeating-linear-gradient(0deg, #f8e5cc 0 43px, #e8c7a8 43px 47px);
+}
+.kitchen-counter {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 21%;
+  background: linear-gradient(#ddb180 0 10px, #ad7b52 10px 15px, #c89462 15px);
+  border-top: 4px solid #f4d09a;
+}
+.energy-meter,
+.meal-goal {
+  position: absolute;
+  top: 15px;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  background: #fffcf0ed;
+  border-radius: 18px;
+  padding: 11px 14px;
+  box-shadow: 0 3px #d7c5a866;
+}
+.energy-meter {
+  left: 16px;
+  color: #b48a3c;
+}
+.energy-meter > div {
+  display: flex;
+  gap: 3px;
+}
+.energy-meter i {
+  width: 12px;
+  height: 23px;
+  background: #e3decb;
+  border-radius: 3px;
+}
+.energy-meter .charged {
+  background: #86b86b;
+  box-shadow: inset 0 3px #aed890;
+}
+.meal-goal {
+  right: 16px;
+  color: #a67b31;
+}
+.meal-goal b {
+  font-size: 29px;
+}
+.meal-goal small {
+  font-size: 19px;
+  font-weight: 500;
+  color: #a89978;
+}
+.bar-diner {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 41px;
+  height: calc(100% - 42px);
+  width: 46%;
+  max-width: 430px;
+}
+.bar-body,
+.bar-reaction {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: bottom;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 6px 0 #8c643526);
+}
+.bar-reaction {
+  animation: diner-reaction 2.1s both;
+}
+.food-correct .bar-body,
+.food-wrong .bar-body {
+  animation: diner-base 2.1s both;
+}
+.strong .strength-glow {
+  position: absolute;
+  inset: 10% -12% 5%;
+  background: radial-gradient(ellipse, #ffdf7977, transparent 68%);
+}
+.strength-star {
+  position: absolute;
+  color: #fff4b6;
+  text-shadow: 0 2px #b39143;
+  font-size: 48px;
+  animation: kitchen-twinkle 1.5s ease-in-out infinite;
+}
+.strength-star.one {
+  top: 22%;
+  left: 4%;
+}
+.strength-star.two {
+  top: 37%;
+  right: -3%;
+  animation-delay: 0.5s;
+}
+.meal-preview {
+  position: absolute;
+  left: 75%;
+  bottom: 23%;
+  width: 155px;
+  height: 130px;
+  transform: translateX(-50%);
+  z-index: 3;
+}
+.food-item {
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+.meal-preview > .food-item {
+  position: absolute;
+  bottom: 21px;
+  left: 22px;
+  width: 110px;
+  height: 110px;
+  filter: drop-shadow(0 6px 0 #8b725125);
+  animation: meal-bob 3s ease-in-out infinite;
+}
+.meal-plate {
+  position: absolute;
+  bottom: 4px;
+  width: 155px;
+  height: 52px;
+  border: 7px solid #fffdf7;
+  border-radius: 50%;
+  background: #efe7d6;
+  box-shadow:
+    0 7px #bcb6a7,
+    0 12px 0 #805d3522,
+    inset 0 0 0 3px #dbd1be;
+}
+.double-bonus {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  position: absolute;
+  bottom: 132px;
+  left: 32px;
+  background: #ffd576;
+  color: #8f5e29;
+  padding: 6px 12px;
+  border: 3px solid #fff5ce;
+  border-radius: 14px;
+  font-size: 27px;
+  font-weight: 800;
+  white-space: nowrap;
+  box-shadow: 0 4px #d1a04e44;
+}
+.double-bonus .icon {
+  width: 21px;
+  fill: #fff3bb;
+}
+.bonus-meal .meal-plate {
+  border-color: #ffe19b;
+  box-shadow:
+    0 7px #d4b268,
+    0 0 0 11px #ffd36c22;
+}
+.served > .food-item {
+  visibility: hidden;
+}
+.food-reward {
+  position: absolute;
+  top: 52%;
+  left: 75%;
+  width: 95px;
+  height: 95px;
+  z-index: 6;
+  pointer-events: none;
+}
+.food-reward > img {
+  width: 100%;
+  height: 100%;
+}
+.food-reward > span {
+  position: absolute;
+  right: -18px;
+  top: -15px;
+  color: #fffdf1;
+  background: #63a16d;
+  border: 3px solid #fff9e9;
+  border-radius: 15px;
+  padding: 5px 9px;
+  font-size: 27px;
+  font-weight: 800;
+}
+.food-reward.correct {
+  animation: meal-to-mouth 1.6s ease-in-out both;
+}
+.food-reward.wrong {
+  animation: bad-snack 1.6s ease-out both;
+}
+.food-reward.wrong > span {
+  background: #c18b79;
+}
+.food-collection {
+  position: absolute;
+  bottom: 11px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 6px;
+  padding: 8px 12px;
+  background: #986b46cc;
+  border: 2px solid #e5ba85;
+  border-radius: 17px;
+  z-index: 4;
+}
+.food-collection > span {
+  width: 43px;
+  height: 43px;
+  border: 2px dashed #d6b58d;
+  border-radius: 11px;
+  display: grid;
+  place-items: center;
+  color: #e0c3a0;
+}
+.food-collection .collected {
+  background: #fff5d9;
+  border-style: solid;
+  border-color: #ffe6a4;
+}
+.food-collection .goal-slot {
+  outline: 3px solid #ffe398;
+  outline-offset: 1px;
+}
+.food-collection img {
+  width: 100%;
+  height: 100%;
+}
+.food-collection .icon {
+  width: 22px;
+  height: 22px;
+}
+.food-finale .bar-diner {
+  height: calc(100% - 30px);
+}
+.food-finale .meal-goal {
+  right: 24px;
+}
+.food-result .result-score img {
+  width: 100%;
+  height: 100%;
+}
+.food-confetti {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.food-confetti i {
+  position: absolute;
+  left: var(--x);
+  top: -20px;
+  width: 10px;
+  height: 17px;
+  background: #eabb54;
+  animation: meal-confetti 3s calc(var(--i) * -0.13s) linear infinite;
+}
+.food-confetti i:nth-child(3n) {
+  background: #91bd83;
+}
+.food-confetti i:nth-child(3n + 1) {
+  background: #e09a8b;
+}
+@keyframes diner-reaction {
+  0%,
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes diner-base {
+  0%,
+  80% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes meal-bob {
+  50% {
+    transform: translateY(-7px) rotate(4deg);
+  }
+}
+@keyframes meal-to-mouth {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+  45% {
+    top: 34%;
+    left: 52%;
+    transform: translate(-50%, -50%) scale(0.8);
+    opacity: 1;
+  }
+  65%,
+  100% {
+    top: 31%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.25);
+    opacity: 0;
+  }
+}
+@keyframes bad-snack {
+  0% {
+    left: 75%;
+    top: 52%;
+    transform: translate(-50%, -50%) scale(0.7) rotate(-10deg);
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  45% {
+    left: 52%;
+    top: 34%;
+    transform: translate(-50%, -50%) scale(0.85) rotate(10deg);
+    opacity: 1;
+  }
+  65% {
+    left: 50%;
+    top: 31%;
+    transform: translate(-50%, -50%) scale(0.6) rotate(-8deg);
+    opacity: 1;
+  }
+  100% {
+    left: 50%;
+    top: 31%;
+    transform: translate(-50%, -50%) scale(0.2);
+    opacity: 0;
+  }
+}
+@keyframes kitchen-twinkle {
+  50% {
+    transform: scale(0.65) rotate(20deg);
+    opacity: 0.4;
+  }
+}
+@keyframes meal-confetti {
+  to {
+    top: 110%;
+    transform: rotate(360deg);
+  }
+}
+@media (orientation: portrait) {
+  .home-screen .start-dock {
+    flex-basis: 120px;
+  }
+  .food-stage {
+    min-height: 330px;
+  }
+  .bar-diner {
+    width: 58%;
+    height: calc(100% - 62px);
+    bottom: 53px;
+  }
+  .meal-preview {
+    left: 82%;
+    bottom: 23%;
+    width: 125px;
+    height: 115px;
+  }
+  .meal-plate {
+    width: 125px;
+    height: 45px;
+  }
+  .meal-preview > .food-item {
+    width: 94px;
+    height: 94px;
+    left: 15px;
+  }
+  .double-bonus {
+    bottom: 115px;
+    left: 17px;
+  }
+  .kitchen-window {
+    left: 5%;
+    top: 22%;
+    height: 35%;
+  }
+  .kitchen-shelf {
+    right: 4%;
+    top: 24%;
+  }
+  .energy-meter i {
+    width: 10px;
+  }
+}
+@media (max-width: 700px) {
+  .journey-route .level-node {
+    width: 88px;
+    height: 90px;
+  }
+  .node-picture img {
+    width: 75px;
+    height: 60px;
+  }
+  .activity-food .node-picture img {
+    width: 54px;
+    height: 54px;
+  }
+  .energy-meter {
+    padding: 8px;
+    gap: 4px;
+    left: 9px;
+  }
+  .energy-meter i {
+    width: 7px;
+    height: 19px;
+  }
+  .energy-meter .icon {
+    width: 19px;
+  }
+  .meal-goal {
+    right: 9px;
+    padding: 8px;
+    gap: 5px;
+  }
+  .meal-goal b {
+    font-size: 24px;
+  }
+  .food-collection {
+    gap: 4px;
+    padding: 6px;
+  }
+  .food-collection > span {
+    width: 27px;
+    height: 32px;
+  }
+  .food-collection .icon {
+    width: 17px;
+  }
+  .meal-preview {
+    left: 82%;
+    width: 90px;
+  }
+  .meal-plate {
+    width: 90px;
+    height: 34px;
+  }
+  .meal-preview > .food-item {
+    width: 75px;
+    height: 75px;
+    left: 7px;
+  }
+  .double-bonus {
+    bottom: 101px;
+    left: 0;
+    font-size: 23px;
+  }
+  .food-reward {
+    width: 75px;
+    height: 75px;
+  }
+}
+.reduce-motion .bar-reaction {
+  opacity: 1;
+}
+.reduce-motion .food-correct .bar-body,
+.reduce-motion .food-wrong .bar-body {
+  opacity: 0;
+}
+.reduce-motion .food-reward.correct,
+.reduce-motion .food-reward.wrong {
+  left: 64%;
+  top: 43%;
+  transform: translate(-50%, -50%);
+}
+@media (prefers-reduced-motion: reduce) {
+  .bar-reaction {
+    opacity: 1;
+  }
+  .food-correct .bar-body,
+  .food-wrong .bar-body {
+    opacity: 0;
+  }
+  .food-reward.correct,
+  .food-reward.wrong {
+    left: 64%;
+    top: 43%;
+    transform: translate(-50%, -50%);
+  }
+}
+.dot-group i.taken {
+  position: relative;
+  opacity: 0.35;
+  background: #ad8b80;
+}
+.dot-group i.taken:after {
+  content: "";
+  position: absolute;
+  height: 2px;
+  width: 145%;
+  top: 45%;
+  left: -20%;
+  background: #8c665a;
+  transform: rotate(-45deg);
+}
+.food-example .demo-reward img {
+  width: 76px;
+  height: 100px;
+  object-fit: contain;
+}
+.food-example .demo-reward .food-item {
+  width: 58px;
+  height: 58px;
+}
+.food-example.step-3 .demo-reward img {
+  animation: none;
+}
+.food-correct .bar-reaction {
+  animation:
+    diner-reaction 2.1s both,
+    happy-munch 0.22s 0.45s 5;
+  transform-origin: 50% 60%;
+}
+.food-wrong .bar-reaction {
+  animation:
+    diner-reaction 2.1s both,
+    diner-eww 0.45s 0.15s 2;
+  transform-origin: 50% 65%;
+}
+@keyframes happy-munch {
+  50% {
+    transform: translateY(2px) scale(1.015);
+  }
+}
+@keyframes diner-eww {
+  30% {
+    transform: rotate(-2deg);
+  }
+  70% {
+    transform: rotate(2deg);
+  }
+}
+.spoiled > .food-item {
+  visibility: hidden;
+}
+.journey-route .level-node.selected:not(.current) {
+  outline-color: #779582;
+}

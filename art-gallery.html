@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Bar’s Race — art review</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        padding: 30px;
+        background: #f5f3e9;
+        color: #304942;
+        font:
+          16px/1.5 system-ui,
+          sans-serif;
+      }
+      main {
+        max-width: 1200px;
+        margin: auto;
+      }
+      h1 {
+        margin: 0 0 8px;
+      }
+      p {
+        margin: 0 0 25px;
+      }
+      a {
+        color: #377653;
+      }
+      .sprites {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 20px;
+      }
+      .endings {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 20px;
+      }
+      figure {
+        margin: 0;
+        background: #e3ebd8;
+        border: 5px solid #fffdf5;
+        border-radius: 22px;
+        overflow: hidden;
+        box-shadow: 0 4px #dce2d5;
+      }
+      img {
+        width: 100%;
+        display: block;
+        image-rendering: pixelated;
+        object-fit: contain;
+      }
+      .sprites img {
+        height: 200px;
+        padding: 15px;
+      }
+      .endings img {
+        aspect-ratio: 3/2;
+      }
+      figcaption {
+        padding: 12px 18px;
+        background: #fffdf5;
+        font-weight: 650;
+      }
+      h2 {
+        margin-top: 36px;
+      }
+      @media (max-width: 700px) {
+        body {
+          padding: 18px;
+        }
+        .sprites,
+        .endings {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        .sprites img {
+          height: 150px;
+        }
+      }
+      @media (max-width: 450px) {
+        .endings {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Bar’s Race</h1>
+      <p>
+        Art review for the focused race rebuild. <a href="./">Open the game</a>.
+      </p>
+      <h2>Separate moving cars</h2>
+      <section class="sprites">
+        <figure>
+          <img src="./assets/race-v2/bar.png" alt="Bar driving his red kart" />
+          <figcaption>Bar · red</figcaption>
+        </figure>
+        <figure>
+          <img
+            src="./assets/race-v2/bunny.png"
+            alt="Bunny driving a pink kart"
+          />
+          <figcaption>Bunny · pink</figcaption>
+        </figure>
+        <figure>
+          <img src="./assets/race-v2/fox.png" alt="Fox driving a yellow kart" />
+          <figcaption>Fox · yellow</figcaption>
+        </figure>
+        <figure>
+          <img
+            src="./assets/race-v2/panda.png"
+            alt="Panda driving a blue kart"
+          />
+          <figcaption>Panda · blue</figcaption>
+        </figure>
+      </section>
+      <h2>Bar’s reactions</h2>
+      <section class="sprites">
+        <figure>
+          <img
+            src="./assets/race-v2/bar-boost.png"
+            alt="Bar leaning forward with a delighted grin"
+          />
+          <figcaption>Speed boost</figcaption>
+        </figure>
+        <figure>
+          <img
+            src="./assets/race-v2/bar-oops.png"
+            alt="Bar looking gently puzzled after a sputter"
+          />
+          <figcaption>Puzzled, ready to retry</figcaption>
+        </figure>
+      </section>
+      <h2>Finish illustrations</h2>
+      <section class="endings">
+        <figure>
+          <img src="./assets/race-v2/victory.png" alt="Bar wins" />
+          <figcaption>Bar wins</figcaption>
+        </figure>
+        <figure>
+          <img
+            src="./assets/race-v2/finish-bunny.png"
+            alt="Bunny wins and Bar waves"
+          />
+          <figcaption>Bunny wins</figcaption>
+        </figure>
+        <figure>
+          <img
+            src="./assets/race-v2/finish-fox.png"
+            alt="Fox wins and Bar waves"
+          />
+          <figcaption>Fox wins</figcaption>
+        </figure>
+        <figure>
+          <img
+            src="./assets/race-v2/finish-panda.png"
+            alt="Panda wins and Bar waves"
+          />
+          <figcaption>Panda wins</figcaption>
+        </figure>
+      </section>
+    </main>
+  </body>
+</html>
