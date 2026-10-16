@@ -3,10 +3,10 @@ import assert from "node:assert/strict";
 import * as journey from "../src/journey-model.js";
 import * as race from "../src/race-model.js";
 
-test("the route alternates twelve unchanged addition races with twelve subtraction meals", () => {
-  for (let stage = 1; stage <= 24; stage++) {
+test("the familiar race and food stages keep their independent difficulty after rocket insertion", () => {
+  for (let stage = 1; stage <= journey.STAGE_COUNT; stage++) {
     const info = journey.stageInfo(stage);
-    assert.equal(info.kind, stage % 2 ? "race" : "food");
+    if (info.kind === "rocket") continue;
     for (let seed = 1; seed <= 40; seed++) {
       const r = journey.newRound(stage, seed),
         original = race.newRound(info.level, seed);
@@ -24,7 +24,9 @@ test("the route alternates twelve unchanged addition races with twelve subtracti
   }
 });
 test("double sweets affect the outcome; every food history has consistent energy, completion, and saves", () => {
-  for (let stage = 2; stage <= 24; stage += 2)
+  for (const stage of journey.STAGES.flatMap((s, i) =>
+    s.kind === "food" ? [i + 1] : [],
+  ))
     for (let history = 0; history < 256; history++) {
       const s = journey.freshSave();
       s.unlocked = stage;
@@ -62,7 +64,10 @@ test("double sweets affect the outcome; every food history has consistent energy
       journey.completeRound(s);
       assert.equal(s.completed.includes(stage), points >= 7);
       assert.equal(s.completed.length, points >= 7 ? 1 : 0);
-      assert.equal(s.unlocked, points >= 7 ? Math.min(24, stage + 1) : stage);
+      assert.equal(
+        s.unlocked,
+        points >= 7 ? Math.min(journey.STAGE_COUNT, stage + 1) : stage,
+      );
       if (points >= 7) assert.ok(journey.foodProgress(s.round).energy >= 7);
     }
   const r = journey.newRound(2, 4);
@@ -83,7 +88,7 @@ test("race migration preserves exact unfinished work and earned results at the n
   const before = JSON.stringify(old);
   const save = journey.migrateRaceSave(old);
   assert.equal(JSON.stringify(old), before);
-  assert.equal(save.unlocked, 7);
+  assert.equal(save.unlocked, journey.stageFor("race", 4));
   assert.equal(save.selected, 5);
   assert.deepEqual(save.completed, [1, 3]);
   assert.deepEqual(save.best, { 1: 8, 3: 6 });

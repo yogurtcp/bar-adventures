@@ -119,7 +119,22 @@ export function playSound(kind, options) {
       endingSources = rendered.sources;
       return { id: ending.id, label: ending.label };
     }
-    if (kind === "boost") {
+    if (kind === "rocket-boost") {
+      whoosh(0.65, 0.045, 180, 1900);
+      tone(85, 0, 0.6, "triangle", 310, 0.12);
+      [880, 1320, 1760].forEach((f, i) =>
+        tone(f, 0.15 + i * 0.09, 0.18, "sine", f * 1.04, 0.035),
+      );
+    } else if (kind === "rocket-sputter") {
+      tone(220, 0, 0.15, "triangle", 90, 0.1);
+      tone(320, 0.2, 0.26, "sine", 160, 0.075);
+      tone(190, 0.5, 0.18, "triangle", 95, 0.07);
+    } else if (kind === "rocket-land" || kind === "rocket-return") {
+      whoosh(0.75, 0.04, 1300, 200);
+      const notes =
+        kind === "rocket-land" ? [523, 659, 784, 1047] : [660, 523, 440];
+      notes.forEach((f, i) => tone(f, i * 0.13, 0.35, "sine", f, 0.07));
+    } else if (kind === "boost") {
       whoosh(0.48, 0.075, 380, 2400);
       tone(95, 0, 0.55, "triangle", 330, 0.2);
       [740, 988, 1244].forEach((f, i) =>

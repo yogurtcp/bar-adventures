@@ -2,7 +2,7 @@
 
 ## Current scope
 
-The current product has one scrolling route with 24 alternating addition-race and subtraction-food stages. Other activities remain hidden. The historical race-only sections below document earlier work; the food update at the end describes the new baseline.
+The current product has one scrolling route with 34 race, food and rocket stages. The first rocket is stage 7, after three complete race/food pairs. Other activities remain hidden. The historical race-only sections below document earlier work; the food update at the end describes the new baseline.
 
 ## Implemented
 
@@ -96,3 +96,14 @@ The current product has one scrolling route with 24 alternating addition-race an
 - Made runtime asset and entry paths work under the GitHub Pages project subpath. Added a static build and a branch-based Pages deployment command; the authenticated account has repository permission but no workflow scope, so publishing does not require a workflow upload.
 - Yucky items now fly toward Bar’s mouth just like the food rewards. Added three short, locally synthesized cartoon “eww” vocal gestures, timed to the approaching item, with automatic ducking of the musical loss cue. Mute and canceled navigation apply to the delayed cue too.
 - Chrome verified the yucky item moves from the plate toward Bar’s face, the three vowel/formant variants produce distinct audible, unclipped output, mute suppresses the sound, and leaving the game cancels the delayed “eww.” No runtime errors. Report: `artifacts/food-review/eww-report.json`.
+
+## Rocket missions and gradual introduction — 2026-10-16
+
+- Inserted ten rocket missions into the shared scrolling route. Stages 1–6 remain the three original easy race/food pairs. Rocket mission 1 is stage 7, followed by another race/food pair before every later mission; the complete route has 34 stages. Debug unlocks remain enabled for review.
+- Rocket difficulty starts independently at missing-number addition `□ + 1 = 2`, totals up to three, dot frames and two distinct choices. Missions 1–3 keep the blank on the left. Mission 4 introduces the other position; later addition grows gradually to ten. Subtraction starts only at rocket mission 8. Operands, results and solutions remain nonnegative and no larger than ten.
+- Six earned cells move the actual ship through six visible checkpoints. Three mistakes sends it safely home. Missions end immediately at either boundary, using at most eight questions. No thinking-time penalty, narration, or between-question button. Filled answers appear in the missing operand, not at the result.
+- Five generated pixel assets show Bar piloting, cheering and puzzled inside his rocket, a moon landing, and a gentle return to an alien mechanic. Cockpit expressions briefly enlarge above the actual moving ship. Added space engines, swooshes and landing/return cues alongside the existing six rotating answer scores per outcome.
+- Version 4 saves migrate both v3 races and meals by activity/level, preserving completed checks, best scores and exact unfinished questions. A completed last old stage unlocks its newly inserted successor without requiring a replay. Old save keys remain untouched; debug and normal saves stay separate.
+- Twenty tests pass, including all 2,560 rocket answer histories across ten difficulty levels, early outcomes, equation/choice validity, save restoration, invalid saves, first-six-stage scheduling, and legacy migration. Existing race and food tests still pass.
+- Chrome checks passed for all three rocket choice bands and late-flight cockpit close-ups at 1280×800, 1024×768, 1180×820, 800×1280 and 768×1024. Full eight-question wins and immediate three-mistake losses verified audible feedback, corrected equations, endings, automatic progression and map returns. Normal-mode checks verified food stage 6 → easy rocket 7 → race 8 unlocks, and exact old race/food resume after migration. Screenshots and reports are in `artifacts/rocket-review/`.
+- Static builds version the complete module/CSS directory together to prevent stale cached modules after a public update.

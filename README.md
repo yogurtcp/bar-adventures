@@ -1,6 +1,6 @@
 # Bar’s Adventures
 
-The game now follows one scrolling route with **24 alternating stages**: twelve addition races and twelve subtraction meals. The other activities remain hidden.
+The game follows one scrolling route with **34 stages**: twelve addition races, twelve subtraction meals, and ten missing-number rocket missions. The first six stages are race/food pairs; the first rocket is stage 7. Later rockets each follow another race/food pair. Other activities remain hidden.
 
 **[Play Bar’s Adventures](https://yogurtcp.github.io/bar-adventures/)**
 
@@ -8,7 +8,7 @@ The game now follows one scrolling route with **24 alternating stages**: twelve 
 
 ## Deploy
 
-Push source changes to `main`, then run `npm run deploy` to test, build and publish the game to the `gh-pages` branch. GitHub Pages automatically publishes that branch. The deploy command uses Git and an authenticated GitHub CLI (`gh`), keeps the working checkout untouched, and needs no workflow token scope. `npm run build` produces the standalone static site in `dist/`; no backend or dependencies are required. Asset paths work at both the local root and the GitHub Pages repository subpath. Player progress is local to each browser and site origin.
+Push source changes to `main`, then run `npm run deploy` to test, build and publish the game to the `gh-pages` branch. GitHub Pages automatically publishes that branch. The deploy command uses Git and an authenticated GitHub CLI (`gh`), keeps the working checkout untouched, and needs no workflow token scope. `npm run build` produces the standalone static site in `dist/`; no backend or dependencies are required. Asset paths work at both the local root and the GitHub Pages repository subpath. Built code and styles share a content-versioned folder so tablets load a consistent set of modules after deployment. Player progress is local to each browser and site origin.
 
 ## Run locally
 
@@ -21,11 +21,11 @@ Open **http://localhost:4173**. No dependency installation is needed: runtime us
 
 ## What Bar plays
 
-- The start screen shows the scrolling, numbered 24-stage map, alternating a Bar car picture for races and an egg picture for meals. Passed stages have green checkmarks, locked stages have padlocks, and the current stage has a gold highlight with Bar’s car and a flag. Tap a stage to play it, or use the large play button to resume the selected stage. Passed stages remain replayable.
+- The start screen shows the scrolling, numbered 34-stage map, with Bar’s car for races, an egg for meals, and his spaceship for rocket missions. Passed stages have green checkmarks, locked stages have padlocks, and the current stage has a gold highlight with an activity picture and a flag. Tap a stage to play it, or use the large play button to resume the selected stage. Passed stages remain replayable.
 - Four independent transparent car sprites show Bar, bunny, fox, and panda driving. Their positions are actual saved race progress, animated across four lanes toward a visible finish line.
 - Races use one addition problem at a time. Activity levels 1–3 stay within five and offer two answers; later levels stay within ten and offer three, then four answers.
 - Correct first attempts give a substantial boost. A wrong answer lets the animals gain ground; a successful retry gives Bar a smaller recovery boost. The same question stays visible, rejected choices are disabled, and additional quantity help appears after mistakes.
-- Thinking time never changes positions. A round has eight questions; six correct first attempts wins. The last answer triggers a visible sprint across the finish before the illustrated ending. Each possible animal winner has a matching ending. A win shows the victory picture briefly, then automatically returns to the start map with the next stage selected.
+- Thinking time never changes positions. A race has eight questions; six correct first attempts wins. The last answer triggers a visible sprint across the finish before the illustrated ending. Each possible animal winner has a matching ending. A win shows the victory picture briefly, then automatically returns to the start map with the next stage selected.
 - Solved questions advance automatically after a 2.4-second reward; there is no between-question next button. Mistakes retain the question and allow retry after the reaction. Bar’s head briefly enlarges to 3.5× on his own car to emphasize each new expression.
 - No speech or written instructions in the child flow. There are short nonverbal sounds, mute, a first-visit silent demonstration, and a replay-example hand icon.
 - Progress saves locally, including the exact unfinished question and rejected choices. Existing race-level unlocks migrate from the previous version. Reset and volume/motion settings are inside the protected parent panel.
@@ -38,12 +38,23 @@ Open **http://localhost:4173**. No dependency installation is needed: runtime us
 - Bar starts with three energy units. Correct answers add their food reward and wrong answers remove one energy unit. Low energy shows slumped shoulders and a sad face; high energy shows a bigger, flexing, smiling Bar. Thinking time never drains energy. A tray shows every earned food point, including both bonus rewards.
 - Five new generated character poses cover ready, eating, disgusted, tired and strong. No speech or child-facing words. Correct/wrong answers use the six existing sound variations per set.
 - Food wins show a strong, happy finale and then return to the map. Losses show tired Bar with replay and map controls. Progress, unfinished questions and activity difficulty persist in the browser.
-- Existing race progress migrates to odd-numbered stages without marking the newly inserted food stages passed. For example, old race level 3 becomes stage 5.
+- Existing race and food progress migrates by activity and difficulty level when rocket missions are inserted. Completed stages, best results and unfinished questions are preserved; new rocket stages are not marked passed.
+
+## Rocket missions
+
+- The first rocket is **stage 7**, after three race/food pairs. Further rocket missions are stages 10, 13, 16, 19, 22, 25, 28, 31 and 34. Rocket difficulty is independent of the race and food difficulty.
+- Mission 1 starts with `□ + 1 = 2`, only two answer choices, totals no larger than three, and a dot frame showing known and missing quantities. Missions 2–3 keep addition and a missing left operand, with totals up to four and five. Mission 4 introduces the missing right operand; missions 5–7 gradually increase addition range and choice count. Only missions 8–10 introduce subtraction. Every value and answer stays between zero and ten.
+- Correct choices fill the actual missing operand, charge a power cell and visibly fly Bar’s rocket to the next of six checkpoints. Mistakes cause a funny engine hiccup and a puzzled cockpit close-up, then show the correct equation and advance. The rocket does not move while the child thinks.
+- Six cells wins immediately; three mistakes ends the mission immediately. There are at most eight questions, with no extra questions after the outcome is settled. Answers auto-advance and no next button is used.
+- Bar remains visible inside the generated ship. A large, cropped cockpit portrait briefly emphasizes his new expression. Space engine sounds accompany the existing rotating answer music, with shared mute and volume.
+- A win shows Bar planting a moon flag with a tiny alien, then returns to the map. A loss shows a gentle return to Earth with an alien mechanic, with replay/map controls. A separate silent example demonstrates filling the missing box.
+- Five new generated assets and exact prompts are in `public/assets/rocket-v1/` and `art-source/ROCKET_V1_PROMPTS.md`.
 
 ## Code map
 
 - `src/app.js`: screens, shared input locking, automatic transitions, map scrolling and persistence.
-- `src/journey-model.js`: alternating stages, migration, subtraction generation, food rewards, energy and completion.
+- `src/journey-model.js`: activity schedule, v2/v3 save migration, subtraction generation, food rewards, energy and completion.
+- `src/rocket-model.js`, `src/rocket-view.js`, `src/rocket.css`: easy-to-hard missing-number questions, early mission outcomes, flight movement, cockpit reactions and endings.
 - `src/food-view.js`, `src/food.css`: kitchen, food animation, Bar expressions and scrolling map.
 - `public/assets/food-v1/`: five generated Bar sprites; prompts in `art-source/FOOD_V1_PROMPTS.md`.
 - `src/race-sound.js`: layered nonverbal engine/whoosh, sparkle, tap and finish sounds with immediate master mute.
@@ -64,11 +75,11 @@ Art review: **http://localhost:4173/art-gallery.html**. This adult review page h
 npm test
 ```
 
-The 13 tests cover every eight-answer history for all twelve race and food levels, subtraction choices, double rewards, energy, save recovery, race migration, retries, debug access and retained progress. See `IMPLEMENTATION_STATUS.md` for actual browser checks and remaining limitations.
+The 20 tests cover every eight-answer history for all twelve race and food levels, subtraction choices, double rewards, energy, save recovery, race migration, retries, debug access and retained progress. Rocket tests also cover every answer history at all ten difficulties, early stopping, migration, and the six-stage prerequisite. See `IMPLEMENTATION_STATUS.md` for actual browser checks and remaining limitations.
 
 ## Temporary debug access
 
-All 24 stages are currently playable for review. `DEBUG_UNLOCK_ALL_LEVELS` in `src/config.js` is enabled. Set it to `false` and refresh to restore earned locks. Debug sessions save separately under `bar-journey-v3-debug`; normal adventure progress uses `bar-journey-v3`. Both previous race records are retained for migration and left untouched.
+All 34 stages are currently playable for review. `DEBUG_UNLOCK_ALL_LEVELS` in `src/config.js` is enabled. Set it to `false` and refresh to restore earned locks. Debug sessions save separately under `bar-journey-v4-debug`; normal adventure progress uses `bar-journey-v4`. Previous v3 adventure and v2 race records are retained for migration and left untouched.
 
 ## Answer sounds
 

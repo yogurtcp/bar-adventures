@@ -1,5 +1,8 @@
 export const ASSET = new URL("../assets/race-v2/", import.meta.url).href;
 export const ICONS = {
+  rocket:
+    '<path d="M9 15c-3-5 1-10 10-12 2 9-1 14-6 14z"/><circle cx="15" cy="8" r="2"/><path d="m8 10-5 3 5 1m7 2-2 5-1-5M7 17l-3 3m1-5-3 3m7 1-3 3"/>',
+
   plate:
     '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><path d="M1 3v6m2-6v6m-1 0v12M23 3v18"/>',
   bolt: '<path d="m13 2-9 12h7l-1 8 10-13h-7z"/>',

@@ -1,6 +1,6 @@
 {
   "name": "bar-adventures",
-  "version": "3.0.0",
+  "version": "4.0.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -9,5 +9,5 @@
     "build": "node scripts/build-site.mjs",
     "deploy": "node scripts/deploy-pages.mjs"
   },
-  "description": "Tablet addition races and subtraction meals for Bar"
+  "description": "Tablet addition races, subtraction meals, and missing-number rocket trips for Bar"
 }
