@@ -1,3 +1,4 @@
+import { animalButton } from "./animal-view.js";
 import { icon } from "./race-art.js";
 import { foodProgress, mealFor, MISHAPS, FOOD_GOAL } from "./journey-model.js";
 export const FOOD_ASSET = new URL("../assets/food-v1/", import.meta.url).href;
@@ -22,7 +23,7 @@ export function foodScene(round, feedback = "", result = false) {
     : foodPose(round);
   const reaction = feedback === "correct" ? "eating" : "eww";
   return `<section class="food-stage ${feedback ? "food-" + feedback : ""} ${meal.bonus && !result ? "bonus-meal" : ""} ${result ? "food-finale" : ""}" data-energy="${progress.energy}" data-points="${progress.points}" aria-label="Bar’s kitchen, ${progress.points} of ${FOOD_GOAL} food points collected, energy ${progress.energy} of 10">
-    ${kitchen()}
+    ${kitchen()}${animalButton(["cat", "dog", "bunny", "fox", "panda", "penguin"][(round.level - 1) % 6], "food-companion")}
     <div class="energy-meter" aria-label="Bar’s energy">${icon("bolt")}<div>${Array.from({ length: 10 }, (_, i) => `<i class="${i < Math.floor(progress.energy) ? "charged" : ""}"></i>`).join("")}</div>${icon(pose === "strong" ? "strong" : pose === "tired" ? "moon" : "heart")}</div>
     <div class="meal-goal" aria-label="Collect ${FOOD_GOAL} food points to finish">${icon("trophy")}<b>${progress.points}<small> / ${FOOD_GOAL}</small></b></div>
     <div class="bar-diner ${pose}" data-pose="${pose}"><div class="strength-glow"></div><img class="bar-body" src="${FOOD_ASSET}${pose}.png" alt="Bar ${pose === "strong" ? "flexing his arms and smiling" : pose === "tired" ? "looking tired and sad" : "ready for a meal"}" draggable="false"/>${feedback && !result ? `<img class="bar-reaction" src="${FOOD_ASSET}${reaction}.png" alt="Bar ${reaction === "eating" ? "happily chewing" : "making a funny eww face"}" draggable="false"/>` : ""}${pose === "strong" ? `<span class="strength-star one">✦</span><span class="strength-star two">✦</span>` : ""}</div>

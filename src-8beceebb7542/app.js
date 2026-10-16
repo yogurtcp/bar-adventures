@@ -1,4 +1,13 @@
 import {
+  pancakeScene,
+  pancakeQuestion,
+  pancakeTutorial,
+  pancakeResult,
+  pancakeStack,
+  CAFE_ASSET,
+} from "./pancake-view.js";
+import { animalSprite, bindAnimalTaps } from "./animal-view.js";
+import {
   DRIVERS,
   WIN_SCORE,
   positions,
@@ -50,6 +59,8 @@ let timers = [];
 let locked = false;
 let storageAvailable = true;
 let mapScroll = null;
+let disposeAnimalTaps = () => {};
+const isPancake = () => save.round?.kind === "pancake";
 const isFood = () => save.round?.kind === "food";
 const isRocket = () => save.round?.kind === "rocket";
 const roundStage = () => save.round?.stage || save.selected;
@@ -59,14 +70,16 @@ function readSave() {
       localStorage.getItem(activeSaveKey) ||
       (DEBUG_UNLOCK_ALL_LEVELS ? localStorage.getItem(SAVE_KEY) : null);
     if (raw) return normalizeForMode(JSON.parse(raw));
-    const journeyRaw =
-      localStorage.getItem(
-        DEBUG_UNLOCK_ALL_LEVELS ? "bar-journey-v3-debug" : "bar-journey-v3",
-      ) || localStorage.getItem("bar-journey-v3");
-    if (journeyRaw)
-      return migrateJourneySave(JSON.parse(journeyRaw), {
-        unlockAllLevels: DEBUG_UNLOCK_ALL_LEVELS,
-      });
+    for (const version of [4, 3]) {
+      const key = `bar-journey-v${version}`;
+      const journeyRaw =
+        localStorage.getItem(DEBUG_UNLOCK_ALL_LEVELS ? `${key}-debug` : key) ||
+        localStorage.getItem(key);
+      if (journeyRaw)
+        return migrateJourneySave(JSON.parse(journeyRaw), {
+          unlockAllLevels: DEBUG_UNLOCK_ALL_LEVELS,
+        });
+    }
     const raceRaw =
       localStorage.getItem(
         DEBUG_UNLOCK_ALL_LEVELS ? "bar-race-v2-debug" : "bar-race-v2",
@@ -127,7 +140,7 @@ function currentTask() {
 function topbar() {
   const level =
     view === "play" || view === "result" ? roundStage() : save.selected;
-  return `<header class="topbar"><div class="brand-symbol ${view !== "home" && isRocket() ? "rocket-brand" : view !== "home" && isFood() ? "food-brand" : ""}" aria-label="Bar’s adventures">${view !== "home" && isRocket() ? icon("rocket") : view !== "home" && isFood() ? icon("plate") : checkers()}</div><div class="top-middle">${view === "play" ? `<div class="question-flags" aria-label="Round questions">${save.round.tasks.map((q, i) => `<span class="question-flag ${q.resolved ? (q.firstTry ? "passed" : "missed") : i === save.round.index ? "active" : ""}" aria-label="Question ${i + 1}${q.resolved ? (q.firstTry ? ", correct first try" : ", completed with help") : ""}">${q.resolved ? icon(q.firstTry ? "check" : "flag") : `<i></i>`}</span>`).join("")}</div>` : `<span class="level-pill" aria-label="Level ${level}">${icon("flag")}<b>${level}</b></span>`}</div><nav class="top-actions" aria-label="Game controls">${view !== "home" ? button("home", "Back to stage map", "home") : ""}${view === "play" && phase !== "finish" ? button("help", "Show silent example", "hand") : ""}${button("sound", save.sound ? "Mute sounds" : "Enable sounds", save.sound ? "sound" : "mute")}${button("parent", "Parent settings", "settings")}</nav></header>`;
+  return `<header class="topbar"><div class="brand-symbol ${view !== "home" && isPancake() ? "cafe-brand" : view !== "home" && isRocket() ? "rocket-brand" : view !== "home" && isFood() ? "food-brand" : ""}" aria-label="Bar’s adventures">${view !== "home" && isPancake() ? pancakeStack(3) : view !== "home" && isRocket() ? icon("rocket") : view !== "home" && isFood() ? icon("plate") : checkers()}</div><div class="top-middle">${view === "play" ? `<div class="question-flags" aria-label="Round questions">${save.round.tasks.map((q, i) => `<span class="question-flag ${q.resolved ? (q.firstTry ? "passed" : "missed") : i === save.round.index ? "active" : ""}" aria-label="Question ${i + 1}${q.resolved ? (q.firstTry ? ", correct first try" : ", completed with help") : ""}">${q.resolved ? icon(q.firstTry ? "check" : "flag") : `<i></i>`}</span>`).join("")}</div>` : `<span class="level-pill" aria-label="Level ${level}">${icon("flag")}<b>${level}</b></span>`}</div><nav class="top-actions" aria-label="Game controls">${view !== "home" ? button("home", "Back to stage map", "home") : ""}${view === "play" && phase !== "finish" ? button("help", "Show silent example", "hand") : ""}${button("sound", save.sound ? "Mute sounds" : "Enable sounds", save.sound ? "sound" : "mute")}${button("parent", "Parent settings", "settings")}</nav></header>`;
 }
 function racerSprite(driver) {
   if (driver.id !== "bar" || view !== "play") return driver.sprite;
@@ -169,13 +182,14 @@ function racers(distance, finishing = false) {
       : ["bar", "bunny", "fox", "panda"];
   return DRIVERS.map(
     (d) =>
-      `<div class="lane ${d.id === "bar" ? "bar-lane" : ""}" data-lane="${d.id}"><div class="lane-dashes"></div><div class="racer ${d.id === "bar" ? "player" : ""} ${d.id === "bar" && feedback ? "emphasizing" : ""} ${feedback === "correct" && d.id === "bar" ? "boosting" : ""} ${feedback === "wrong" && d.id === "bar" ? "sputtering" : ""}" data-car="${d.id}" data-distance="${distance[d.id]}" style="left:${12 + distance[d.id] * 0.76}%;--car-color:${d.color};${finishing ? `--drive-time:${Math.max(0.35, (104 - distance[d.id]) / 18)}s` : ""}"><span class="exhaust" aria-hidden="true"><i></i><i></i><i></i></span><span class="rank" aria-label="${d.name}, position ${order.indexOf(d.id) + 1}">${order.indexOf(d.id) + 1}</span><img src="${ASSET + racerSprite(d)}.png" draggable="false" alt="${d.name} driving ${d.id === "bar" ? "a red" : d.id === "bunny" ? "a pink" : d.id === "fox" ? "a yellow" : "a blue"} car" />${expressionHead(d)}</div></div>`,
+      `<div class="lane ${d.id === "bar" ? "bar-lane" : ""}" data-lane="${d.id}"><div class="lane-dashes"></div><${d.id === "bar" ? "div" : 'button type="button"'} ${d.id !== "bar" ? `data-animal="${d.id}" data-mood="ready" aria-label="Play with ${d.name}"` : ""} class="racer ${d.id === "bar" ? "player" : ""} ${d.id === "bar" && feedback ? "emphasizing" : ""} ${feedback === "correct" && d.id === "bar" ? "boosting" : ""} ${feedback === "wrong" && d.id === "bar" ? "sputtering" : ""}" data-car="${d.id}" data-distance="${distance[d.id]}" style="left:${12 + distance[d.id] * 0.76}%;--car-color:${d.color};${finishing ? `--drive-time:${Math.max(0.35, (104 - distance[d.id]) / 18)}s` : ""}"><span class="exhaust" aria-hidden="true"><i></i><i></i><i></i></span><span class="rank" aria-label="${d.name}, position ${order.indexOf(d.id) + 1}">${order.indexOf(d.id) + 1}</span><img src="${ASSET + racerSprite(d)}.png" draggable="false" alt="${d.name} driving ${d.id === "bar" ? "a red" : d.id === "bunny" ? "a pink" : d.id === "fox" ? "a yellow" : "a blue"} car" />${expressionHead(d)}${d.id !== "bar" ? `<span class="car-reaction">${animalSprite(d.id)}</span>` : ""}</${d.id === "bar" ? "div" : "button"}></div>`,
   ).join("");
 }
 function track(distance, finishing = false) {
   return `<section class="race-stage ${feedback ? "reaction-" + feedback : ""} ${phase === "countdown" ? "starting" : ""} ${finishing ? "finishing" : ""}" aria-label="Live race track">${scenery(roundStage())}<div class="track-side"><span class="track-flower"></span><span class="track-flower second"></span></div><div class="road"><div class="curb upper"></div><div class="start-line" aria-hidden="true"></div><div class="finish-line" aria-label="Finish line">${checkers()}<span class="finish-pole"></span></div>${racers(distance, finishing)}<div class="curb lower"></div></div><div class="grass-bottom"></div>${phase === "countdown" ? `<div class="start-lights" aria-label="Race starts in ${countdown}">${[3, 2, 1].map((n) => `<i class="${countdown >= n ? "lit" : ""}"></i>`).join("")}</div>` : ""}${phase === "finish" ? `<div class="finish-flags" aria-hidden="true">${checkers()}${checkers()}</div>` : ""}</section>`;
 }
 function activityPicture(kind) {
+  if (kind === "pancake") return pancakeStack(3);
   return kind === "race"
     ? `<img src="${ASSET}bar.png" alt="Race" draggable="false"/>`
     : kind === "rocket"
@@ -202,7 +216,7 @@ function routeScreen() {
         ? ` C${prev.x + side} ${prev.y + 60} ${p.x + side} ${p.y - 60} ${p.x} ${p.y}`
         : ` L${p.x} ${p.y}`;
   }
-  return `<section class="route-screen journey-route"><div class="route-scroll" tabindex="0" aria-label="Scroll to explore race, food and rocket stages"><div class="route-map" style="height:${height}px"><svg class="level-road" viewBox="0 0 1000 ${height}" preserveAspectRatio="none" aria-hidden="true"><path d="${path}" fill="none" stroke="#a3b599" stroke-width="65" stroke-linecap="round" stroke-linejoin="round"/><path d="${path}" fill="none" stroke="#fff2c9" stroke-width="3" stroke-dasharray="12 12"/></svg>${pts
+  return `<section class="route-screen journey-route"><div class="route-scroll" tabindex="0" aria-label="Scroll to explore race, food, rocket and café stages"><div class="route-map" style="height:${height}px"><svg class="level-road" viewBox="0 0 1000 ${height}" preserveAspectRatio="none" aria-hidden="true"><path d="${path}" fill="none" stroke="#a3b599" stroke-width="65" stroke-linecap="round" stroke-linejoin="round"/><path d="${path}" fill="none" stroke="#fff2c9" stroke-width="3" stroke-dasharray="12 12"/></svg>${pts
     .map((p, i) => {
       const n = i + 1,
         kind = stageInfo(n).kind,
@@ -224,6 +238,7 @@ function quantity(q, help = false) {
   return `<div class="quantity-cue ${help ? "joining" : ""}" aria-hidden="true">${dots(q.a, "red")}<span>${isFood() ? "−" : "+"}</span>${dots(q.b, "blue")}${help ? `<span>=</span><span class="joined-dots">${isFood() ? dots(q.answer, "red") : dots(q.a, "red") + dots(q.b, "blue")}</span>` : ""}</div>`;
 }
 function questionPanel() {
+  if (isPancake()) return pancakeQuestion(save.round, feedback, locked);
   if (isRocket())
     return `<section class="math-dock rocket-dock ${feedback ? "feedback-" + feedback : ""} ${questionEntry ? "new-question" : ""}" aria-label="Missing-number question">${rocketQuestion(currentTask(), save.round, locked)}<span class="feedback-symbol ${feedback}" role="status" aria-label="${feedback === "correct" ? "Power cell earned" : feedback === "wrong" ? "Engine hiccup, correct number shown" : ""}">${feedback ? icon(feedback === "correct" ? "check" : "replay") : ""}</span></section>`;
   const q = currentTask(),
@@ -236,12 +251,14 @@ function resultButtons(won) {
 }
 function resultScreen() {
   const won = wonRound(save.round);
+  if (isPancake()) return pancakeResult(save.round, resultButtons(won));
   if (isFood()) return foodResult(save.round, resultButtons(won));
   if (isRocket()) return rocketResult(save.round, resultButtons(won));
   const winner = standings(save.round)[0];
   return `<section class="result-screen ${won ? "won" : "try-again"}"><div class="result-art"><img src="${ASSET}${won ? "victory" : "finish-" + winner.id}.png" alt="${won ? "Bar crosses first in his red car while his animal friends cheer" : winner.name + " wins this race and Bar gives a friendly wave from his red car"}"/></div><div class="result-dock"><div class="result-medal">${icon(won ? "trophy" : "flag")}</div><div class="result-score" aria-label="${score(save.round)} out of 8 correct on the first try">${save.round.tasks.map((q) => `<i class="${q.firstTry ? "passed" : "missed"}">${icon(q.firstTry ? "check" : "flag")}</i>`).join("")}</div><div class="result-actions">${resultButtons(won)}</div></div></section>`;
 }
 function tutorial() {
+  if (isPancake()) return pancakeTutorial(demoStep);
   if (isRocket()) return rocketTutorial(demoStep);
   const food = isFood(),
     result = food ? 2 : 3;
@@ -250,17 +267,23 @@ function tutorial() {
 function render(options = {}) {
   document.documentElement.classList.toggle("reduce-motion", reduced());
   const target =
-    view === "play" && !isRocket()
+    view === "play" && !isRocket() && !isPancake()
       ? positions(save.round)
       : { bar: 0, bunny: 0, fox: 0, panda: 0 };
   const from = options.from || target;
   const finishing = phase === "finish";
   const oldScroll = root.querySelector(".route-scroll");
   if (oldScroll) mapScroll = oldScroll.scrollTop;
-  root.innerHTML = `<main class="app-shell screen-${view}">${topbar()}${view === "home" ? homeScreen() : view === "levels" ? routeScreen() : view === "result" ? resultScreen() : `<div class="race-screen">${isRocket() ? rocketScene(save.round, feedback, options.rocketFrom, finishing) : isFood() ? foodScene(save.round, feedback) : track(from, finishing)}${questionPanel()}</div>`}${demo ? tutorial() : ""}</main>`;
+  disposeAnimalTaps();
+  root.innerHTML = `<main class="app-shell screen-${view}">${topbar()}${view === "home" ? homeScreen() : view === "levels" ? routeScreen() : view === "result" ? resultScreen() : `<div class="race-screen">${isPancake() ? pancakeScene(save.round, feedback) : isRocket() ? rocketScene(save.round, feedback, options.rocketFrom, finishing) : isFood() ? foodScene(save.round, feedback) : track(from, finishing)}${questionPanel()}</div>`}${demo ? tutorial() : ""}</main>`;
   bind();
+  disposeAnimalTaps = bindAnimalTaps(root, sound);
   questionEntry = false;
   fitExpressionHeads();
+  fitChefPlate();
+  const chefImage = root.querySelector(".bar-chef img");
+  if (chefImage && !chefImage.complete)
+    chefImage.addEventListener("load", fitChefPlate, { once: true });
   const scroller = root.querySelector(".route-scroll");
   if (scroller) {
     const selected = scroller.querySelector(`[data-level="${save.selected}"]`);
@@ -333,11 +356,12 @@ function bind() {
     clearTimers();
     demo = false;
     if (view === "play" && phase === "intro") {
-      if (isRocket()) save.taughtRocket = true;
+      if (isPancake()) save.taughtPancake = true;
+      else if (isRocket()) save.taughtRocket = true;
       else if (isFood()) save.taughtFood = true;
       else save.taught = true;
       persist();
-      if (isFood() || isRocket()) {
+      if (isFood() || isRocket() || isPancake()) {
         phase = "question";
         locked = false;
         render();
@@ -355,6 +379,9 @@ function bind() {
       prepareRace(save.selected);
     }),
   );
+  root
+    .querySelectorAll("[data-plate]")
+    .forEach((b) => b.addEventListener("click", () => answer(b.dataset.plate)));
   root
     .querySelectorAll("[data-answer]")
     .forEach((b) =>
@@ -409,7 +436,13 @@ function prepareRace(level, replay = false) {
     }
   }
   if (
-    isRocket() ? !save.taughtRocket : isFood() ? !save.taughtFood : !save.taught
+    isPancake()
+      ? !save.taughtPancake
+      : isRocket()
+        ? !save.taughtRocket
+        : isFood()
+          ? !save.taughtFood
+          : !save.taught
   ) {
     phase = "intro";
     render();
@@ -422,7 +455,7 @@ function prepareRace(level, replay = false) {
       questionEntry = true;
       render();
     }
-  } else if (isFood() || isRocket()) {
+  } else if (isFood() || isRocket() || isPancake()) {
     phase = "question";
     locked = false;
     questionEntry = true;
@@ -447,7 +480,15 @@ function showDemo(first) {
   later(() => {
     demoStep = 3;
     render();
-    sound(isRocket() ? "rocket-boost" : isFood() ? "win" : "boost");
+    sound(
+      isPancake()
+        ? "win"
+        : isRocket()
+          ? "rocket-boost"
+          : isFood()
+            ? "win"
+            : "boost",
+    );
   }, 2300);
 }
 function startCountdown() {
@@ -476,18 +517,42 @@ function startCountdown() {
 }
 function answer(value) {
   if (view !== "play" || phase !== "question" || locked || demo) return;
-  const before = isRocket() ? rocketPoint(save.round) : positions(save.round);
+  const before = isPancake()
+    ? null
+    : isRocket()
+      ? rocketPoint(save.round)
+      : positions(save.round);
   const result = submit(save.round, value);
   if (!result.accepted) return;
+  if (isPancake() && !result.graded) {
+    persist();
+    sound("tap");
+    render();
+    return;
+  }
   locked = true;
   feedback = result.correct ? "correct" : "wrong";
   completeRound(save);
   persist();
   sound(result.correct ? "win" : "lose");
   if (isRocket()) sound(result.correct ? "rocket-boost" : "rocket-sputter");
-  render(isRocket() ? { rocketFrom: before } : { from: before });
+  render(
+    isPancake() ? {} : isRocket() ? { rocketFrom: before } : { from: before },
+  );
   const roundId = save.round.id;
   const taskId = currentTask().id;
+  if (isPancake()) {
+    later(() => {
+      if (
+        view === "play" &&
+        save.round?.id === roundId &&
+        currentTask()?.id === taskId
+      )
+        sound(
+          `animal:${currentTask().animal}:${result.correct ? "happy" : "surprised"}`,
+        );
+    }, 650);
+  }
   if (isFood() && !result.correct) {
     later(() => {
       if (
@@ -499,22 +564,25 @@ function answer(value) {
         sound("eww");
     }, 580);
   }
-  later(() => {
-    if (
-      view !== "play" ||
-      save.round?.id !== roundId ||
-      currentTask()?.id !== taskId
-    )
-      return;
-    feedback = "";
-    locked = false;
-    if (currentTask().resolved) nextQuestion();
-    else render();
-  }, REACTION_MS[feedback]);
+  later(
+    () => {
+      if (
+        view !== "play" ||
+        save.round?.id !== roundId ||
+        currentTask()?.id !== taskId
+      )
+        return;
+      feedback = "";
+      locked = false;
+      if (currentTask().resolved) nextQuestion();
+      else render();
+    },
+    isPancake() ? (result.correct ? 2600 : 3100) : REACTION_MS[feedback],
+  );
 }
 function nextQuestion() {
   if (locked || demo || !currentTask()?.resolved) return;
-  if (isRocket() ? save.round.status === "finished" : save.round.index === 7) {
+  if (save.round.status === "finished") {
     finishRace();
     return;
   }
@@ -547,7 +615,7 @@ function finishRace() {
     );
     return;
   }
-  if (isFood()) {
+  if (isFood() || isPancake()) {
     view = "result";
     phase = "idle";
     feedback = "";
@@ -633,7 +701,7 @@ function adultSettings() {
       panel.querySelector("input").focus();
       return;
     }
-    panel.innerHTML = `<div class="adult-dialog"><div class="adult-heading"><h2>Parent settings</h2><button type="button" data-close aria-label="Close parent settings">${icon("close")}</button></div><p>Addition races, subtraction meals, and missing-number rocket trips. Rockets begin after three race/food pairs, with their own easy starting difficulty. Races and meals have eight questions each. Races need six first-try answers; meals need seven food points out of ten. Two sweets are double bonuses. Food questions have one attempt, then show the answer and move on. Rocket missions need six power cells before three mistakes, ending as soon as either is reached. Thinking time is unlimited.</p><label>Sound volume<input type="range" min="0" max=".7" step=".05" value="${save.volume}"/></label><div class="adult-sound-previews"><button type="button" data-preview-win>Preview correct-answer sound</button><button type="button" data-preview-lose>Preview wrong-answer sound</button></div><label class="check-label"><input type="checkbox" data-motion ${save.reducedMotion ? "checked" : ""}/> Reduce motion</label><button type="button" data-demo>Show silent example next time</button><button type="button" data-reset>Reset adventure progress</button><p class="storage-status">${storageAvailable ? "Progress saves in this browser." : "This browser is not allowing progress to be saved."}</p></div>`;
+    panel.innerHTML = `<div class="adult-dialog"><div class="adult-heading"><h2>Parent settings</h2><button type="button" data-close aria-label="Close parent settings">${icon("close")}</button></div><p>Addition races, subtraction meals, and missing-number rocket trips. Rockets begin after three race/food pairs, with their own easy starting difficulty. Races and meals have eight questions each. Races need six first-try answers; meals need seven food points out of ten. Two sweets are double bonuses. Food questions have one attempt, then show the answer and move on. Rocket missions need six power cells before three mistakes, ending as soon as either is reached. Café stages begin at stage 8. Choose two pancake plates to match the order; tap your first plate again to undo. Any matching pair works. Four correct orders out of five wins. Tap animal friends for a playful reaction; this never affects answers or progress. Thinking time is unlimited.</p><label>Sound volume<input type="range" min="0" max=".7" step=".05" value="${save.volume}"/></label><div class="adult-sound-previews"><button type="button" data-preview-win>Preview correct-answer sound</button><button type="button" data-preview-lose>Preview wrong-answer sound</button></div><label class="check-label"><input type="checkbox" data-motion ${save.reducedMotion ? "checked" : ""}/> Reduce motion</label><button type="button" data-demo>Show silent example next time</button><button type="button" data-reset>Reset adventure progress</button><p class="storage-status">${storageAvailable ? "Progress saves in this browser." : "This browser is not allowing progress to be saved."}</p></div>`;
     panel.querySelector("[data-close]").onclick = close;
     panel.querySelector("input[type=range]").oninput = (e) => {
       save.volume = +e.target.value;
@@ -657,6 +725,7 @@ function adultSettings() {
       save.taught = false;
       save.taughtFood = false;
       save.taughtRocket = false;
+      save.taughtPancake = false;
       persist();
       panel.querySelector("[data-demo]").textContent =
         "Example will play before the next activity";
@@ -687,7 +756,37 @@ function fitPilotZoom() {
   const top = (stage.clientHeight * point.y) / 100 - craft.offsetHeight / 2;
   zoom.style.top = `${Math.max(68 - top, -90)}px`;
 }
+function fitChefPlate() {
+  const stage = root.querySelector(".cafe-stage"),
+    chef = root.querySelector(".bar-chef"),
+    serving = root.querySelector(".chef-serving");
+  if (!stage || !chef || !serving) return;
+  const img = chef.querySelector("img");
+  if (!img.naturalWidth) return;
+  const w = Math.min(
+      chef.clientWidth,
+      (chef.clientHeight * img.naturalWidth) / img.naturalHeight,
+    ),
+    h = (w * img.naturalHeight) / img.naturalWidth;
+  const a = stage.getBoundingClientRect(),
+    b = chef.getBoundingClientRect();
+  const x = b.left - a.left + (b.width - w) / 2 + w * 0.62,
+    y = b.top - a.top + (b.height - h) / 2 + h * 0.575;
+  stage.style.setProperty("--serve-x", `${x}px`);
+  stage.style.setProperty("--serve-y", `${y}px`);
+  stage.style.setProperty("--serve-scale", Math.min(1.2, (w * 0.39) / 90));
+  const customer = root.querySelector(".cafe-customer");
+  if (customer) {
+    const c = customer.getBoundingClientRect();
+    stage.style.setProperty(
+      "--customer-x",
+      `${c.left - a.left + c.width * 0.5}px`,
+    );
+    stage.style.setProperty("--customer-y", `${c.bottom - a.top}px`);
+  }
+}
 window.addEventListener("resize", () => {
+  fitChefPlate();
   fitExpressionHeads();
   fitPilotZoom();
 });
@@ -697,4 +796,9 @@ for (const pose of ["ready", "eating", "eww", "strong", "tired"]) {
   const image = new Image();
   image.decoding = "async";
   image.src = `${FOOD_ASSET}${pose}.png`;
+}
+
+for (const pose of ["ready", "happy", "oops"]) {
+  const image = new Image();
+  image.src = `${CAFE_ASSET}chef-${pose}.png`;
 }
