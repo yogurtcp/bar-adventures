@@ -247,7 +247,7 @@ function questionPanel() {
   return `<section class="math-dock ${feedback ? "feedback-" + feedback : ""} ${questionEntry ? "new-question" : ""}" aria-label="${isFood() ? "Subtraction" : "Addition"} question"><div class="question-block"><div class="equation" aria-label="${q.a} ${isFood() ? "minus" : "plus"} ${q.b} equals ${done ? q.answer : "what"}"><span class="operand-a">${q.a}</span><span class="operator">${isFood() ? "−" : "+"}</span><span class="operand-b">${q.b}</span><span class="operator">=</span><span class="answer-slot ${done ? "filled" : ""}">${done ? q.answer : "?"}</span></div><div class="quantity-space">${showHelp ? quantity(q, q.assisted) : ""}</div></div><div class="answer-grid choices-${q.choices.length}">${q.choices.map((value) => `<button class="answer-button ${q.rejected.includes(value) ? "rejected" : ""} ${done && value === q.answer ? "correct" : ""} ${q.assisted && value === q.answer && !done ? "assisted" : ""}" data-answer="${value}" ${locked || done || q.rejected.includes(value) ? "disabled" : ""} aria-label="Answer ${value}">${value}${q.rejected.includes(value) ? `<span class="rejected-mark" aria-hidden="true">${icon("close")}</span>` : ""}</button>`).join("")}</div><span class="feedback-symbol ${feedback}" role="status" aria-label="${feedback === "correct" ? (isFood() ? "Correct, Bar gets the food" : "Correct, Bar gets a boost") : feedback === "wrong" ? (isFood() ? "Wrong answer, a silly bad snack" : "Try again, an animal moves ahead") : ""}">${feedback ? icon(feedback === "correct" ? "check" : "replay") : ""}</span></section>`;
 }
 function resultButtons(won) {
-  return `${button("levels", "Choose a stage", "map", "result-button")}${button("replay", "Play again", "replay", "result-button")}${won && roundStage() < STAGE_COUNT ? button("next-level", "Start next stage", "play", "result-button primary") : ""}`;
+  return `${button("levels", "Back to adventure map", "map", won ? "result-button primary" : "result-button")}${button("replay", "Play again", "replay", "result-button")}`;
 }
 function resultScreen() {
   const won = wonRound(save.round);
@@ -350,7 +350,10 @@ function bind() {
   });
   on("parent", adultSettings);
   on("play", () => prepareRace(save.selected));
-  on("levels", () => navigate("levels"));
+  on("levels", () => {
+    mapScroll = null;
+    navigate("home");
+  });
   on("help", () => showDemo(false));
   on("demo-continue", () => {
     clearTimers();
@@ -369,9 +372,6 @@ function bind() {
     } else render();
   });
   on("replay", () => prepareRace(roundStage(), true));
-  on("next-level", () =>
-    prepareRace(Math.min(STAGE_COUNT, roundStage() + 1), true),
-  );
   root.querySelectorAll("[data-level]").forEach((b) =>
     b.addEventListener("click", () => {
       save.selected = +b.dataset.level;
