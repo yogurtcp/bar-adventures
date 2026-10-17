@@ -10,6 +10,16 @@ The game follows one scrolling route with **44 stages**: twelve addition races, 
 
 Push source changes to `main`, then run `npm run deploy` to test, build and publish the game to the `gh-pages` branch. GitHub Pages automatically publishes that branch. The deploy command uses Git and an authenticated GitHub CLI (`gh`), keeps the working checkout untouched, and needs no workflow token scope. `npm run build` produces the standalone static site in `dist/`; no backend or dependencies are required. Asset paths work at both the local root and the GitHub Pages repository subpath. Built code and styles share a content-versioned folder so tablets load a consistent set of modules after deployment. Player progress is local to each browser and site origin.
 
+## Install on a tablet
+
+Open the [public game](https://yogurtcp.github.io/bar-adventures/) and tap **Bar’s portrait with the download arrow** at the top of the map. In Chrome, confirm **Install**, then launch Bar’s icon from the home screen or app list. The installed game uses a standalone app window without browser tabs or the address bar. The install control hides in standalone mode.
+
+If the browser does not offer its native prompt, the same button opens short instructions. On iPad/iPhone, use **Share → Add to Home Screen → Add**; keep **Open as Web App** enabled if offered. The generated Bar portrait supplies the Android app icon, Apple home-screen icon, and browser favicon. Installation behavior follows the browser’s [PWA installation support](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Installing).
+
+The public HTTPS site supports installation; ordinary HTTP LAN addresses are for browser play. The app shell and map art are cached for offline launches, with additional artwork cached as it is used. New, unseen artwork may still need a connection. App launches check for updates, and a new service worker waits for existing game windows/tabs to close rather than interrupting play. Caching never changes player saves or stage locks; progress remains local to the browser/app environment.
+
+Assets: `public/assets/app-v1/`. Built-in imagegen prompt and provenance: [`art-source/APP_ICON_V1_PROMPT.md`](art-source/APP_ICON_V1_PROMPT.md).
+
 ## Run locally
 
 ```sh
@@ -65,6 +75,7 @@ Open **http://localhost:4173**. No dependency installation is needed: runtime us
 
 - `src/pancake-model.js`, `src/pancake-view.js`, `src/pancake.css`: pair selection, countable stacks, café customers, serving, reactions and outcomes.
 - `src/animal-view.js`, `src/animals.css`, `src/animal-sound.js`: shared tappable animal poses and locally synthesized voices.
+- `src/install.js`, `src/install.css`, `public/manifest.webmanifest`, `sw.js`: install control, platform instructions, standalone metadata and scoped caching. The build versions the worker and precaches the generated app shell.
 - `src/app.js`: screens, shared input locking, automatic transitions, map scrolling and persistence.
 - `src/journey-model.js`: activity schedule, v2/v3/v4 save migration, subtraction generation, food rewards, energy and completion.
 - `src/rocket-model.js`, `src/rocket-view.js`, `src/rocket.css`: easy-to-hard missing-number questions, early mission outcomes, flight movement, cockpit reactions and endings.
@@ -88,7 +99,7 @@ Art review: **http://localhost:4173/art-gallery.html**. This adult review page h
 npm test
 ```
 
-The 25 tests cover every eight-answer history for all twelve race and food levels, subtraction choices, double rewards, energy, save recovery, race migration, retries, debug access and retained progress. Rocket tests also cover every answer history at all ten difficulties, early stopping, migration, the six-stage prerequisite, all café answer histories, every plate pair, selection undo/reload, tampered café saves and v4 migration. See `IMPLEMENTATION_STATUS.md` for actual browser checks and remaining limitations.
+The 29 tests cover every eight-answer history for all twelve race and food levels, subtraction choices, double rewards, energy, save recovery, race migration, retries, debug access and retained progress. Rocket tests also cover every answer history at all ten difficulties, early stopping, migration, the six-stage prerequisite, all café answer histories, every plate pair, selection undo/reload, tampered café saves v4 migration, install metadata, exact icon sizes, offline caching, update handling and cache isolation. See `IMPLEMENTATION_STATUS.md` for actual browser checks and remaining limitations.
 
 ## Temporary debug access
 

@@ -37,5 +37,41 @@ await cp(new URL("src/", project), new URL(`${sourceFolder}/`, output), {
 await cp(new URL("public/assets/", project), new URL("assets/", output), {
   recursive: true,
 });
+await cp(
+  new URL("public/manifest.webmanifest", project),
+  new URL("manifest.webmanifest", output),
+);
+const worker = await readFile(new URL("sw.js", project), "utf8");
+const manifest = await readFile(
+  new URL("public/manifest.webmanifest", project),
+);
+const releaseHash = createHash("sha256")
+  .update(sourceFolder)
+  .update(html)
+  .update(manifest)
+  .update(worker);
+for (const size of [180, 192, 512])
+  releaseHash.update(
+    await readFile(new URL(`public/assets/app-v1/bar-${size}.png`, project)),
+  );
+const release = releaseHash.digest("hex").slice(0, 16);
+const shell = [
+  "./",
+  "./index.html",
+  "./manifest.webmanifest",
+  ...(await readdir(new URL("src/", project)))
+    .filter((name) => /\.(js|css)$/.test(name))
+    .map((name) => `./${sourceFolder}/${name}`),
+  ...[180, 192, 512].map((size) => `./assets/app-v1/bar-${size}.png`),
+  "./assets/race-v2/bar.png",
+  "./assets/rocket-v1/ship.png",
+  "./assets/objects/egg.webp",
+];
+await writeFile(
+  new URL("sw.js", output),
+  worker
+    .replace('/* __BUILD__ */ "development"', JSON.stringify(release))
+    .replace("/* __SHELL__ */ []", JSON.stringify(shell)),
+);
 await writeFile(new URL(".nojekyll", output), "");
 console.log(`Static site built in dist/ (${sourceFolder}).`);

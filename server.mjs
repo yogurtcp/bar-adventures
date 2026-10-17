@@ -11,6 +11,7 @@ const mime = {
   ".webp": "image/webp",
   ".png": "image/png",
   ".json": "application/json; charset=utf-8",
+  ".webmanifest": "application/manifest+json; charset=utf-8",
   ".svg": "image/svg+xml",
 };
 
@@ -33,6 +34,8 @@ createServer((req, res) => {
   const allowed =
     pathname === "/" ||
     pathname === "/art-gallery.html" ||
+    pathname === "/manifest.webmanifest" ||
+    pathname === "/sw.js" ||
     pathname.startsWith("/assets/") ||
     (pathname.startsWith("/src/") &&
       [".js", ".css"].includes(extname(pathname)));
@@ -43,9 +46,11 @@ createServer((req, res) => {
   const file =
     pathname === "/"
       ? resolve(root, "index.html")
-      : pathname.startsWith("/assets/")
-        ? resolve(root, "public", `.${pathname}`)
-        : resolve(root, `.${pathname}`);
+      : pathname === "/manifest.webmanifest"
+        ? resolve(root, "public/manifest.webmanifest")
+        : pathname.startsWith("/assets/")
+          ? resolve(root, "public", `.${pathname}`)
+          : resolve(root, `.${pathname}`);
   if (!file.startsWith(root + sep)) {
     res.writeHead(404).end();
     return;

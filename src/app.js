@@ -1,3 +1,4 @@
+import { installButton, bindInstallButton } from "./install.js";
 import {
   pancakeScene,
   pancakeQuestion,
@@ -140,7 +141,7 @@ function currentTask() {
 function topbar() {
   const level =
     view === "play" || view === "result" ? roundStage() : save.selected;
-  return `<header class="topbar"><div class="brand-symbol ${view !== "home" && isPancake() ? "cafe-brand" : view !== "home" && isRocket() ? "rocket-brand" : view !== "home" && isFood() ? "food-brand" : ""}" aria-label="Bar’s adventures">${view !== "home" && isPancake() ? pancakeStack(3) : view !== "home" && isRocket() ? icon("rocket") : view !== "home" && isFood() ? icon("plate") : checkers()}</div><div class="top-middle">${view === "play" ? `<div class="question-flags" aria-label="Round questions">${save.round.tasks.map((q, i) => `<span class="question-flag ${q.resolved ? (q.firstTry ? "passed" : "missed") : i === save.round.index ? "active" : ""}" aria-label="Question ${i + 1}${q.resolved ? (q.firstTry ? ", correct first try" : ", completed with help") : ""}">${q.resolved ? icon(q.firstTry ? "check" : "flag") : `<i></i>`}</span>`).join("")}</div>` : `<span class="level-pill" aria-label="Level ${level}">${icon("flag")}<b>${level}</b></span>`}</div><nav class="top-actions" aria-label="Game controls">${view !== "home" ? button("home", "Back to stage map", "home") : ""}${view === "play" && phase !== "finish" ? button("help", "Show silent example", "hand") : ""}${button("sound", save.sound ? "Mute sounds" : "Enable sounds", save.sound ? "sound" : "mute")}${button("parent", "Parent settings", "settings")}</nav></header>`;
+  return `<header class="topbar"><div class="brand-symbol ${view !== "home" && isPancake() ? "cafe-brand" : view !== "home" && isRocket() ? "rocket-brand" : view !== "home" && isFood() ? "food-brand" : ""}" aria-label="Bar’s adventures">${view !== "home" && isPancake() ? pancakeStack(3) : view !== "home" && isRocket() ? icon("rocket") : view !== "home" && isFood() ? icon("plate") : checkers()}</div><div class="top-middle">${view === "play" ? `<div class="question-flags" aria-label="Round questions">${save.round.tasks.map((q, i) => `<span class="question-flag ${q.resolved ? (q.firstTry ? "passed" : "missed") : i === save.round.index ? "active" : ""}" aria-label="Question ${i + 1}${q.resolved ? (q.firstTry ? ", correct first try" : ", completed with help") : ""}">${q.resolved ? icon(q.firstTry ? "check" : "flag") : `<i></i>`}</span>`).join("")}</div>` : `<span class="level-pill" aria-label="Level ${level}">${icon("flag")}<b>${level}</b></span>`}</div><nav class="top-actions" aria-label="Game controls">${view !== "home" ? button("home", "Back to stage map", "home") : ""}${view === "play" && phase !== "finish" ? button("help", "Show silent example", "hand") : ""}${view === "home" ? installButton() : ""}${button("sound", save.sound ? "Mute sounds" : "Enable sounds", save.sound ? "sound" : "mute")}${button("parent", "Parent settings", "settings")}</nav></header>`;
 }
 function racerSprite(driver) {
   if (driver.id !== "bar" || view !== "play") return driver.sprite;
@@ -336,6 +337,7 @@ function render(options = {}) {
   }
 }
 function bind() {
+  bindInstallButton(root);
   const on = (id, fn) =>
     document.getElementById(id)?.addEventListener("click", fn);
   on("home", () => navigate("home"));
