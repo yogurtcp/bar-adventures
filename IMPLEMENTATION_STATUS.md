@@ -121,3 +121,9 @@ The current product has one scrolling route with 44 race, food, rocket and panca
 - Tested taps in race, food, rocket and café: visible reaction, automatic return to base mood, exact save record unchanged and no runtime exceptions. Offline browser audio rendering checked all 18 voices for distinct, nonzero, unclipped signals. A real animal tap produced output RMS 0.02248; mute reduced output RMS to zero while keeping the visual reaction.
 - Normal-mode browser testing confirmed 43 stages initially locked, first rocket victory unlocking café stage 8 while stage 9 remains locked, and real v4 race/food/rocket migration resumes the right question without rewriting old records.
 - Built static-site browser check passed under `/bar-adventures/` for map, food, rocket and café with content-versioned module imports and local assets. Physical tablet audio/touch remains untested.
+
+## Map between stages and normal locks — 2026-10-17
+
+- Result screens now offer a prominent adventure-map button and replay, with the direct start-next-stage shortcut removed. The map button opens the full home map and centers the selected stage. Winning still automatically returns to that map after the celebration.
+- Disabled `DEBUG_UNLOCK_ALL_LEVELS`. New players can open stage 1; each win unlocks the next stage and passed stages remain replayable. Existing normal saves and migrations remain in use; debug saves stay separate and cannot unlock normal stages.
+- All 25 tests and the static build passed. Chrome touch checks completed a win in race, food, rocket and café, verified the map/replay controls, automatic map return, manual map return, passed/current markers, exactly one new unlock, and disabled future-stage taps. A separate full-unlock debug record did not affect normal play. No browser runtime errors occurred. These checks used an isolated local origin and left existing player saves untouched.

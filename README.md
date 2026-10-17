@@ -25,7 +25,7 @@ Open **http://localhost:4173**. No dependency installation is needed: runtime us
 - Four independent transparent car sprites show Bar, bunny, fox, and panda driving. Their positions are actual saved race progress, animated across four lanes toward a visible finish line.
 - Races use one addition problem at a time. Activity levels 1–3 stay within five and offer two answers; later levels stay within ten and offer three, then four answers.
 - Correct first attempts give a substantial boost. A wrong answer lets the animals gain ground; a successful retry gives Bar a smaller recovery boost. The same question stays visible, rejected choices are disabled, and additional quantity help appears after mistakes.
-- Thinking time never changes positions. A race has eight questions; six correct first attempts wins. The last answer triggers a visible sprint across the finish before the illustrated ending. Each possible animal winner has a matching ending. A win shows the victory picture briefly, then automatically returns to the start map with the next stage selected.
+- Thinking time never changes positions. A race has eight questions; six correct first attempts wins. The last answer triggers a visible sprint across the finish before the illustrated ending. Each possible animal winner has a matching ending. A win shows the victory picture briefly, then automatically returns to the start map with the next stage selected. Every game returns through the map between stages; the result screen also has a prominent map button, with no direct start-next-stage shortcut.
 - Solved questions advance automatically after a 2.4-second reward; there is no between-question next button. Mistakes retain the question and allow retry after the reaction. Bar’s head briefly enlarges to 3.5× on his own car to emphasize each new expression.
 - No speech or written instructions in the child flow. There are short nonverbal sounds, mute, a first-visit silent demonstration, and a replay-example hand icon.
 - Progress saves locally, including the exact unfinished question and rejected choices. Existing race-level unlocks migrate from the previous version. Reset and volume/motion settings are inside the protected parent panel.
@@ -92,7 +92,7 @@ The 25 tests cover every eight-answer history for all twelve race and food level
 
 ## Temporary debug access
 
-All 44 stages are currently playable for review. `DEBUG_UNLOCK_ALL_LEVELS` in `src/config.js` is enabled. Set it to `false` and refresh to restore earned locks. Debug sessions save separately under `bar-journey-v5-debug`; normal adventure progress uses `bar-journey-v5`. Previous v4/v3 adventure and v2 race records are retained for migration and left untouched.
+`DEBUG_UNLOCK_ALL_LEVELS` in `src/config.js` is disabled. New players start at stage 1; wins unlock the next stage, and passed stages remain replayable. Normal adventure progress uses `bar-journey-v5`. Previous debug records under `bar-journey-v5-debug` remain separate and do not unlock normal stages. Previous v4/v3 adventure and v2 race records are retained for migration and left untouched.
 
 ## Answer sounds
 
