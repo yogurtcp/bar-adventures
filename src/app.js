@@ -1,3 +1,13 @@
+import { trailsScreen } from "./trails-view.js";
+import {
+  exploreScene,
+  exploreQuestion,
+  exploreTutorial,
+  exploreResult,
+  exploreSprite,
+  EXPLORE_ASSET,
+} from "./explore-view.js";
+import { exploreScore } from "./explore-model.js";
 import { installButton, bindInstallButton } from "./install.js";
 import {
   pancakeScene,
@@ -5,6 +15,7 @@ import {
   pancakeTutorial,
   pancakeResult,
   pancakeStack,
+  setCafeStyle,
   CAFE_ASSET,
 } from "./pancake-view.js";
 import { animalSprite, bindAnimalTaps } from "./animal-view.js";
@@ -18,6 +29,8 @@ import {
 import {
   SAVE_KEY,
   STAGE_COUNT,
+  isStageUnlocked,
+  nextStageOf,
   freshSave,
   normalizeSave,
   migrateRaceSave,
@@ -60,6 +73,14 @@ let timers = [];
 let locked = false;
 let storageAvailable = true;
 let mapScroll = null;
+const trailScroll = {};
+const isExplore = () => ["fishing", "balloon"].includes(save.round?.kind);
+const taughtKey = () =>
+  isExplore()
+    ? save.round.kind === "fishing"
+      ? "taughtFishing"
+      : "taughtBalloon"
+    : null;
 let disposeAnimalTaps = () => {};
 const isPancake = () => save.round?.kind === "pancake";
 const isFood = () => save.round?.kind === "food";
@@ -71,7 +92,7 @@ function readSave() {
       localStorage.getItem(activeSaveKey) ||
       (DEBUG_UNLOCK_ALL_LEVELS ? localStorage.getItem(SAVE_KEY) : null);
     if (raw) return normalizeForMode(JSON.parse(raw));
-    for (const version of [4, 3]) {
+    for (const version of [5, 4, 3]) {
       const key = `bar-journey-v${version}`;
       const journeyRaw =
         localStorage.getItem(DEBUG_UNLOCK_ALL_LEVELS ? `${key}-debug` : key) ||
@@ -139,9 +160,10 @@ function currentTask() {
   return save.round?.tasks[save.round.index];
 }
 function topbar() {
-  const level =
-    view === "play" || view === "result" ? roundStage() : save.selected;
-  return `<header class="topbar"><div class="brand-symbol ${view !== "home" && isPancake() ? "cafe-brand" : view !== "home" && isRocket() ? "rocket-brand" : view !== "home" && isFood() ? "food-brand" : ""}" aria-label="Bar’s adventures">${view !== "home" && isPancake() ? pancakeStack(3) : view !== "home" && isRocket() ? icon("rocket") : view !== "home" && isFood() ? icon("plate") : checkers()}</div><div class="top-middle">${view === "play" ? `<div class="question-flags" aria-label="Round questions">${save.round.tasks.map((q, i) => `<span class="question-flag ${q.resolved ? (q.firstTry ? "passed" : "missed") : i === save.round.index ? "active" : ""}" aria-label="Question ${i + 1}${q.resolved ? (q.firstTry ? ", correct first try" : ", completed with help") : ""}">${q.resolved ? icon(q.firstTry ? "check" : "flag") : `<i></i>`}</span>`).join("")}</div>` : `<span class="level-pill" aria-label="Level ${level}">${icon("flag")}<b>${level}</b></span>`}</div><nav class="top-actions" aria-label="Game controls">${view !== "home" ? button("home", "Back to stage map", "home") : ""}${view === "play" && phase !== "finish" ? button("help", "Show silent example", "hand") : ""}${view === "home" ? installButton() : ""}${button("sound", save.sound ? "Mute sounds" : "Enable sounds", save.sound ? "sound" : "mute")}${button("parent", "Parent settings", "settings")}</nav></header>`;
+  const level = stageInfo(
+    view === "play" || view === "result" ? roundStage() : save.selected,
+  ).level;
+  return `<header class="topbar"><div class="brand-symbol ${view !== "home" && isExplore() ? "explore-brand" : view !== "home" && isPancake() ? "cafe-brand" : view !== "home" && isRocket() ? "rocket-brand" : view !== "home" && isFood() ? "food-brand" : ""}" aria-label="Bar’s adventures">${view !== "home" && isExplore() ? exploreSprite(save.round.kind) : view !== "home" && isPancake() ? pancakeStack(3) : view !== "home" && isRocket() ? icon("rocket") : view !== "home" && isFood() ? icon("plate") : checkers()}</div><div class="top-middle">${view === "play" ? `<div class="question-flags" aria-label="Round questions">${save.round.tasks.map((q, i) => `<span class="question-flag ${q.resolved ? (q.firstTry ? "passed" : "missed") : i === save.round.index ? "active" : ""}" aria-label="Question ${i + 1}${q.resolved ? (q.firstTry ? ", correct first try" : ", completed with help") : ""}">${q.resolved ? icon(q.firstTry ? "check" : "flag") : `<i></i>`}</span>`).join("")}</div>` : `<span class="level-pill" aria-label="Level ${level}">${icon("flag")}<b>${level}</b></span>`}</div><nav class="top-actions" aria-label="Game controls">${view !== "home" ? button("home", "Back to stage map", "home") : ""}${view === "play" && phase !== "finish" ? button("help", "Show silent example", "hand") : ""}${view === "home" ? installButton() : ""}${button("sound", save.sound ? "Mute sounds" : "Enable sounds", save.sound ? "sound" : "mute")}${button("parent", "Parent settings", "settings")}</nav></header>`;
 }
 function racerSprite(driver) {
   if (driver.id !== "bar" || view !== "play") return driver.sprite;
@@ -190,6 +212,7 @@ function track(distance, finishing = false) {
   return `<section class="race-stage ${feedback ? "reaction-" + feedback : ""} ${phase === "countdown" ? "starting" : ""} ${finishing ? "finishing" : ""}" aria-label="Live race track">${scenery(roundStage())}<div class="track-side"><span class="track-flower"></span><span class="track-flower second"></span></div><div class="road"><div class="curb upper"></div><div class="start-line" aria-hidden="true"></div><div class="finish-line" aria-label="Finish line">${checkers()}<span class="finish-pole"></span></div>${racers(distance, finishing)}<div class="curb lower"></div></div><div class="grass-bottom"></div>${phase === "countdown" ? `<div class="start-lights" aria-label="Race starts in ${countdown}">${[3, 2, 1].map((n) => `<i class="${countdown >= n ? "lit" : ""}"></i>`).join("")}</div>` : ""}${phase === "finish" ? `<div class="finish-flags" aria-hidden="true">${checkers()}${checkers()}</div>` : ""}</section>`;
 }
 function activityPicture(kind) {
+  if (["fishing", "balloon"].includes(kind)) return exploreSprite(kind);
   if (kind === "pancake") return pancakeStack(3);
   return kind === "race"
     ? `<img src="${ASSET}bar.png" alt="Race" draggable="false"/>`
@@ -198,37 +221,10 @@ function activityPicture(kind) {
       : objectImage("egg");
 }
 function homeScreen() {
-  return `<section class="home-screen">${routeScreen()}<div class="start-dock"><div class="selected-activity" aria-label="Selected activity">${activityPicture(stageInfo(save.selected).kind)}<b>${save.selected}</b></div><button class="start-button" id="play" aria-label="Start or continue stage ${save.selected}">${icon("play")}</button><div class="earned-cups" aria-label="${save.completed.length} completed stages">${[0, 1, 2].map((i) => `<span class="${save.completed.length > i ? "earned" : ""}">${icon("trophy")}</span>`).join("")}</div></div></section>`;
+  return `<section class="home-screen">${routeScreen()}<div class="start-dock"><div class="selected-activity" aria-label="Selected activity">${activityPicture(stageInfo(save.selected).kind)}<b>${stageInfo(save.selected).level}</b></div><button class="start-button" id="play" aria-label="Start or continue stage ${save.selected}">${icon("play")}</button><div class="earned-cups" aria-label="${save.completed.length} completed stages">${[0, 1, 2].map((i) => `<span class="${save.completed.length > i ? "earned" : ""}">${icon("trophy")}</span>`).join("")}</div></div></section>`;
 }
 function routeScreen() {
-  const height = Math.ceil(STAGE_COUNT / 3) * 165 + 120;
-  const pts = Array.from({ length: STAGE_COUNT }, (_, i) => {
-    const row = Math.floor(i / 3),
-      col = row % 2 ? 2 - (i % 3) : i % 3;
-    return { x: 180 + col * 320, y: 125 + row * 165 };
-  });
-  let path = `M${pts[0].x} ${pts[0].y}`;
-  for (let i = 1; i < pts.length; i++) {
-    const p = pts[i],
-      prev = pts[i - 1];
-    const side = Math.floor((i - 1) / 3) % 2 ? -110 : 110;
-    path +=
-      i % 3 === 0
-        ? ` C${prev.x + side} ${prev.y + 60} ${p.x + side} ${p.y - 60} ${p.x} ${p.y}`
-        : ` L${p.x} ${p.y}`;
-  }
-  return `<section class="route-screen journey-route"><div class="route-scroll" tabindex="0" aria-label="Scroll to explore race, food, rocket and café stages"><div class="route-map" style="height:${height}px"><svg class="level-road" viewBox="0 0 1000 ${height}" preserveAspectRatio="none" aria-hidden="true"><path d="${path}" fill="none" stroke="#a3b599" stroke-width="65" stroke-linecap="round" stroke-linejoin="round"/><path d="${path}" fill="none" stroke="#fff2c9" stroke-width="3" stroke-dasharray="12 12"/></svg>${pts
-    .map((p, i) => {
-      const n = i + 1,
-        kind = stageInfo(n).kind,
-        done = save.completed.includes(n),
-        locked = !DEBUG_UNLOCK_ALL_LEVELS && n > save.unlocked,
-        current = n === save.unlocked;
-      return `<button class="level-node activity-${kind} ${done ? "complete" : ""} ${current ? "current" : ""} ${n === save.selected ? "selected" : ""} ${locked ? "locked" : ""}" style="left:${p.x / 10}%;top:${p.y}px" data-level="${n}" data-activity="${kind}" data-stage-state="${locked ? "locked" : done ? "passed" : current ? "current" : "available"}" ${current ? 'aria-current="step"' : ""} ${locked ? "disabled" : ""} aria-label="Stage ${n}, ${kind}${done ? ", passed" : ""}${current ? ", current stage" : ""}${locked ? ", locked" : ""}"><span class="node-picture">${activityPicture(kind)}</span><b>${n}</b>${done ? `<span class="node-check">${icon("check")}</span>` : locked ? `<span class="node-lock">${icon("lock")}</span>` : ""}${current ? `<span class="current-stage-marker">${icon("flag")}</span>` : ""}</button>`;
-    })
-    .join(
-      "",
-    )}</div></div><div class="map-scroll-hint" aria-hidden="true">${icon("next")}</div></section>`;
+  return trailsScreen(save, activityPicture, DEBUG_UNLOCK_ALL_LEVELS);
 }
 function dots(n, kind) {
   return `<span class="dot-group ${kind}">${Array.from({ length: n }, () => "<i></i>").join("")}</span>`;
@@ -239,6 +235,7 @@ function quantity(q, help = false) {
   return `<div class="quantity-cue ${help ? "joining" : ""}" aria-hidden="true">${dots(q.a, "red")}<span>${isFood() ? "−" : "+"}</span>${dots(q.b, "blue")}${help ? `<span>=</span><span class="joined-dots">${isFood() ? dots(q.answer, "red") : dots(q.a, "red") + dots(q.b, "blue")}</span>` : ""}</div>`;
 }
 function questionPanel() {
+  if (isExplore()) return exploreQuestion(save.round, feedback, locked);
   if (isPancake()) return pancakeQuestion(save.round, feedback, locked);
   if (isRocket())
     return `<section class="math-dock rocket-dock ${feedback ? "feedback-" + feedback : ""} ${questionEntry ? "new-question" : ""}" aria-label="Missing-number question">${rocketQuestion(currentTask(), save.round, locked)}<span class="feedback-symbol ${feedback}" role="status" aria-label="${feedback === "correct" ? "Power cell earned" : feedback === "wrong" ? "Engine hiccup, correct number shown" : ""}">${feedback ? icon(feedback === "correct" ? "check" : "replay") : ""}</span></section>`;
@@ -252,6 +249,7 @@ function resultButtons(won) {
 }
 function resultScreen() {
   const won = wonRound(save.round);
+  if (isExplore()) return exploreResult(save.round, resultButtons(won));
   if (isPancake()) return pancakeResult(save.round, resultButtons(won));
   if (isFood()) return foodResult(save.round, resultButtons(won));
   if (isRocket()) return rocketResult(save.round, resultButtons(won));
@@ -259,6 +257,7 @@ function resultScreen() {
   return `<section class="result-screen ${won ? "won" : "try-again"}"><div class="result-art"><img src="${ASSET}${won ? "victory" : "finish-" + winner.id}.png" alt="${won ? "Bar crosses first in his red car while his animal friends cheer" : winner.name + " wins this race and Bar gives a friendly wave from his red car"}"/></div><div class="result-dock"><div class="result-medal">${icon(won ? "trophy" : "flag")}</div><div class="result-score" aria-label="${score(save.round)} out of 8 correct on the first try">${save.round.tasks.map((q) => `<i class="${q.firstTry ? "passed" : "missed"}">${icon(q.firstTry ? "check" : "flag")}</i>`).join("")}</div><div class="result-actions">${resultButtons(won)}</div></div></section>`;
 }
 function tutorial() {
+  if (isExplore()) return exploreTutorial(save.round.kind, demoStep);
   if (isPancake()) return pancakeTutorial(demoStep);
   if (isRocket()) return rocketTutorial(demoStep);
   const food = isFood(),
@@ -266,30 +265,55 @@ function tutorial() {
   return `<div class="tutorial-backdrop" role="dialog" aria-modal="true" aria-label="Silent example: ${food ? "three minus one makes two" : "one plus two makes three"}"><div class="tutorial-card ${food ? "food-example" : ""} step-${demoStep}"><div class="example-equation"><span>${food ? 3 : 1}</span><b>${food ? "−" : "+"}</b><span>${food ? 1 : 2}</span><b>=</b><span class="answer-slot ${demoStep >= 2 ? "filled" : ""}">${demoStep >= 2 ? result : "?"}</span></div><div class="example-dots">${food ? `<span class="dot-group red"><i></i><i></i><i class="taken"></i></span><span class="join-arrow">${icon("next")}</span>${dots(2, "red")}` : `${dots(1, "red")}<span>+</span>${dots(2, "blue")}<span class="join-arrow">${icon("next")}</span><span class="joined-dots">${dots(1, "red")}${dots(2, "blue")}</span>`}</div><div class="example-options"><span class="example-answer ${demoStep >= 2 ? "correct" : ""}">${result}${demoStep >= 1 ? `<span class="demo-hand">${icon("hand")}</span>` : ""}</span><span class="example-answer">${food ? 4 : 5}</span></div><div class="demo-reward"><img src="${food ? FOOD_ASSET + "eating" : ASSET + "bar"}.png" alt=""/>${food ? objectImage("apple") : '<span class="boost-chevrons">»</span>'}</div><button class="demo-continue" id="demo-continue" aria-label="Start playing">${icon("play")}</button></div></div>`;
 }
 function render(options = {}) {
+  setCafeStyle(save.cafeStyle);
   document.documentElement.classList.toggle("reduce-motion", reduced());
   const target =
-    view === "play" && !isRocket() && !isPancake()
+    view === "play" && save.round.kind === "race"
       ? positions(save.round)
       : { bar: 0, bunny: 0, fox: 0, panda: 0 };
   const from = options.from || target;
   const finishing = phase === "finish";
   const oldScroll = root.querySelector(".route-scroll");
   if (oldScroll) mapScroll = oldScroll.scrollTop;
+  root.querySelectorAll("[data-trail-scroll]").forEach((el) => {
+    trailScroll[el.dataset.trailScroll] = el.scrollLeft;
+  });
   disposeAnimalTaps();
-  root.innerHTML = `<main class="app-shell screen-${view}">${topbar()}${view === "home" ? homeScreen() : view === "levels" ? routeScreen() : view === "result" ? resultScreen() : `<div class="race-screen">${isPancake() ? pancakeScene(save.round, feedback) : isRocket() ? rocketScene(save.round, feedback, options.rocketFrom, finishing) : isFood() ? foodScene(save.round, feedback) : track(from, finishing)}${questionPanel()}</div>`}${demo ? tutorial() : ""}</main>`;
+  root.innerHTML = `<main class="app-shell screen-${view}">${topbar()}${view === "home" ? homeScreen() : view === "levels" ? routeScreen() : view === "result" ? resultScreen() : `<div class="race-screen">${isExplore() ? exploreScene(save.round, feedback, options.exploreFrom) : isPancake() ? pancakeScene(save.round, feedback) : isRocket() ? rocketScene(save.round, feedback, options.rocketFrom, finishing) : isFood() ? foodScene(save.round, feedback) : track(from, finishing)}${questionPanel()}</div>`}${demo ? tutorial() : ""}</main>`;
   bind();
   disposeAnimalTaps = bindAnimalTaps(root, sound);
   questionEntry = false;
   fitExpressionHeads();
   fitChefPlate();
+  fitExploreScene();
   const chefImage = root.querySelector(".bar-chef img");
   if (chefImage && !chefImage.complete)
     chefImage.addEventListener("load", fitChefPlate, { once: true });
   const scroller = root.querySelector(".route-scroll");
   if (scroller) {
     const selected = scroller.querySelector(`[data-level="${save.selected}"]`);
+    const card = selected.closest(".trail-card");
     scroller.scrollTop =
-      mapScroll ?? Math.max(0, selected.offsetTop - scroller.clientHeight / 2);
+      mapScroll ?? Math.max(0, card.offsetTop - scroller.offsetTop - 20);
+    root.querySelectorAll("[data-trail-scroll]").forEach((el) => {
+      const focus = el.querySelector(
+        el.dataset.trailScroll === stageInfo(save.selected).kind
+          ? `[data-level="${save.selected}"]`
+          : '[aria-current="step"]',
+      );
+      el.scrollLeft =
+        mapScroll === null
+          ? Math.max(0, focus.offsetLeft - el.clientWidth / 2)
+          : (trailScroll[el.dataset.trailScroll] ??
+            Math.max(0, focus.offsetLeft - el.clientWidth / 2));
+    });
+    scroller
+      .closest(".journey-route")
+      .classList.toggle(
+        "at-bottom",
+        scroller.scrollTop + scroller.clientHeight >=
+          scroller.scrollHeight - 12,
+      );
     scroller.addEventListener(
       "scroll",
       () => {
@@ -312,6 +336,16 @@ function render(options = {}) {
     root.querySelector(".topbar").inert = true;
     root.querySelector(".race-screen").inert = true;
     document.getElementById("demo-continue")?.focus({ preventScroll: true });
+  }
+  if (
+    isExplore() &&
+    view === "play" &&
+    save.round.kind === "balloon" &&
+    options.exploreFrom !== undefined
+  ) {
+    const rider = root.querySelector("[data-balloon]");
+    rider.getBoundingClientRect();
+    rider.style.bottom = `${8 + Math.min(4, exploreScore(save.round)) * 7}%`;
   }
   if (isRocket() && view === "play") {
     const craft = root.querySelector("[data-rocket]");
@@ -337,6 +371,25 @@ function render(options = {}) {
   }
 }
 function bind() {
+  root.querySelectorAll("[data-cafe-style]").forEach((b) =>
+    b.addEventListener("click", () => {
+      save.cafeStyle = b.dataset.cafeStyle;
+      persist();
+      sound("tap");
+      render();
+    }),
+  );
+  root
+    .querySelectorAll("[data-explore-answer]")
+    .forEach((b) =>
+      b.addEventListener("click", () =>
+        answer(
+          save.round.kind === "fishing"
+            ? +b.dataset.exploreAnswer
+            : b.dataset.exploreAnswer,
+        ),
+      ),
+    );
   bindInstallButton(root);
   const on = (id, fn) =>
     document.getElementById(id)?.addEventListener("click", fn);
@@ -361,12 +414,13 @@ function bind() {
     clearTimers();
     demo = false;
     if (view === "play" && phase === "intro") {
-      if (isPancake()) save.taughtPancake = true;
+      if (isExplore()) save[taughtKey()] = true;
+      else if (isPancake()) save.taughtPancake = true;
       else if (isRocket()) save.taughtRocket = true;
       else if (isFood()) save.taughtFood = true;
       else save.taught = true;
       persist();
-      if (isFood() || isRocket() || isPancake()) {
+      if (isFood() || isRocket() || isPancake() || isExplore()) {
         phase = "question";
         locked = false;
         render();
@@ -376,9 +430,7 @@ function bind() {
   on("replay", () => prepareRace(roundStage(), true));
   root.querySelectorAll("[data-level]").forEach((b) =>
     b.addEventListener("click", () => {
-      save.selected = +b.dataset.level;
-      persist();
-      prepareRace(save.selected);
+      prepareRace(+b.dataset.level);
     }),
   );
   root
@@ -407,7 +459,7 @@ function prepareRace(level, replay = false) {
     !Number.isInteger(level) ||
     level < 1 ||
     level > STAGE_COUNT ||
-    (!DEBUG_UNLOCK_ALL_LEVELS && level > save.unlocked)
+    !isStageUnlocked(save, level, { unlockAllLevels: DEBUG_UNLOCK_ALL_LEVELS })
   )
     return;
   sound("tap");
@@ -424,6 +476,12 @@ function prepareRace(level, replay = false) {
   )
     save.round = newRound(level);
   persist();
+  if (isExplore()) {
+    for (const name of [save.round.kind, "fish"]) {
+      const image = new Image();
+      image.src = `${EXPLORE_ASSET}${name}.png`;
+    }
+  }
   if (isRocket()) {
     for (const state of [
       "ship",
@@ -438,13 +496,15 @@ function prepareRace(level, replay = false) {
     }
   }
   if (
-    isPancake()
-      ? !save.taughtPancake
-      : isRocket()
-        ? !save.taughtRocket
-        : isFood()
-          ? !save.taughtFood
-          : !save.taught
+    isExplore()
+      ? !save[taughtKey()]
+      : isPancake()
+        ? !save.taughtPancake
+        : isRocket()
+          ? !save.taughtRocket
+          : isFood()
+            ? !save.taughtFood
+            : !save.taught
   ) {
     phase = "intro";
     render();
@@ -457,7 +517,7 @@ function prepareRace(level, replay = false) {
       questionEntry = true;
       render();
     }
-  } else if (isFood() || isRocket() || isPancake()) {
+  } else if (isFood() || isRocket() || isPancake() || isExplore()) {
     phase = "question";
     locked = false;
     questionEntry = true;
@@ -483,13 +543,17 @@ function showDemo(first) {
     demoStep = 3;
     render();
     sound(
-      isPancake()
-        ? "win"
-        : isRocket()
-          ? "rocket-boost"
-          : isFood()
-            ? "win"
-            : "boost",
+      isExplore()
+        ? save.round.kind === "fishing"
+          ? "fish-catch"
+          : "balloon-rise"
+        : isPancake()
+          ? "win"
+          : isRocket()
+            ? "rocket-boost"
+            : isFood()
+              ? "win"
+              : "boost",
     );
   }, 2300);
 }
@@ -519,11 +583,13 @@ function startCountdown() {
 }
 function answer(value) {
   if (view !== "play" || phase !== "question" || locked || demo) return;
-  const before = isPancake()
-    ? null
-    : isRocket()
-      ? rocketPoint(save.round)
-      : positions(save.round);
+  const before = isExplore()
+    ? exploreScore(save.round)
+    : isPancake()
+      ? null
+      : isRocket()
+        ? rocketPoint(save.round)
+        : positions(save.round);
   const result = submit(save.round, value);
   if (!result.accepted) return;
   if (isPancake() && !result.graded) {
@@ -537,9 +603,25 @@ function answer(value) {
   completeRound(save);
   persist();
   sound(result.correct ? "win" : "lose");
+  if (isExplore())
+    sound(
+      save.round.kind === "fishing"
+        ? result.correct
+          ? "fish-catch"
+          : "fish-boot"
+        : result.correct
+          ? "balloon-rise"
+          : "balloon-puff",
+    );
   if (isRocket()) sound(result.correct ? "rocket-boost" : "rocket-sputter");
   render(
-    isPancake() ? {} : isRocket() ? { rocketFrom: before } : { from: before },
+    isExplore()
+      ? { exploreFrom: before }
+      : isPancake()
+        ? {}
+        : isRocket()
+          ? { rocketFrom: before }
+          : { from: before },
   );
   const roundId = save.round.id;
   const taskId = currentTask().id;
@@ -579,7 +661,15 @@ function answer(value) {
       if (currentTask().resolved) nextQuestion();
       else render();
     },
-    isPancake() ? (result.correct ? 2600 : 3100) : REACTION_MS[feedback],
+    isExplore()
+      ? save.round.kind === "fishing"
+        ? 2800
+        : 2500
+      : isPancake()
+        ? result.correct
+          ? 2600
+          : 3100
+        : REACTION_MS[feedback],
   );
 }
 function nextQuestion() {
@@ -617,7 +707,7 @@ function finishRace() {
     );
     return;
   }
-  if (isFood() || isPancake()) {
+  if (isFood() || isPancake() || isExplore()) {
     view = "result";
     phase = "idle";
     feedback = "";
@@ -654,7 +744,7 @@ function scheduleWinReturn() {
   const finishedRound = save.round.id;
   later(() => {
     if (view !== "result" || save.round?.id !== finishedRound) return;
-    save.selected = save.unlocked;
+    save.selected = nextStageOf(save.round.stage);
     mapScroll = null;
     navigate("home");
   }, WIN_RETURN_MS);
@@ -703,7 +793,7 @@ function adultSettings() {
       panel.querySelector("input").focus();
       return;
     }
-    panel.innerHTML = `<div class="adult-dialog"><div class="adult-heading"><h2>Parent settings</h2><button type="button" data-close aria-label="Close parent settings">${icon("close")}</button></div><p>Addition races, subtraction meals, and missing-number rocket trips. Rockets begin after three race/food pairs, with their own easy starting difficulty. Races and meals have eight questions each. Races need six first-try answers; meals need seven food points out of ten. Two sweets are double bonuses. Food questions have one attempt, then show the answer and move on. Rocket missions need six power cells before three mistakes, ending as soon as either is reached. Café stages begin at stage 8. Choose two pancake plates to match the order; tap your first plate again to undo. Any matching pair works. Four correct orders out of five wins. Tap animal friends for a playful reaction; this never affects answers or progress. Thinking time is unlimited.</p><label>Sound volume<input type="range" min="0" max=".7" step=".05" value="${save.volume}"/></label><div class="adult-sound-previews"><button type="button" data-preview-win>Preview correct-answer sound</button><button type="button" data-preview-lose>Preview wrong-answer sound</button></div><label class="check-label"><input type="checkbox" data-motion ${save.reducedMotion ? "checked" : ""}/> Reduce motion</label><button type="button" data-demo>Show silent example next time</button><button type="button" data-reset>Reset adventure progress</button><p class="storage-status">${storageAvailable ? "Progress saves in this browser." : "This browser is not allowing progress to be saved."}</p></div>`;
+    panel.innerHTML = `<div class="adult-dialog"><div class="adult-heading"><h2>Parent settings</h2><button type="button" data-close aria-label="Close parent settings">${icon("close")}</button></div><p>Every game has its own path. The first level of every game is open; wins unlock only the next level of that same game. Choose pancakes or waffles with the café pictures. Fishing starts with counting groups of 1–3 fish. Balloons start with greater/less comparisons up to 3, with equality introduced at level 3. Both new games need four rewards from six questions. Races and meals have eight questions each. Races need six first-try answers; meals need seven food points out of ten. Two sweets are double bonuses. Food questions have one attempt, then show the answer and move on. Rocket missions need six power cells before three mistakes, ending as soon as either is reached. The café is available from the beginning. Choose two pancake plates to match the order; tap your first plate again to undo. Any matching pair works. Four correct orders out of five wins. Tap animal friends for a playful reaction; this never affects answers or progress. Thinking time is unlimited.</p><label>Sound volume<input type="range" min="0" max=".7" step=".05" value="${save.volume}"/></label><div class="adult-sound-previews"><button type="button" data-preview-win>Preview correct-answer sound</button><button type="button" data-preview-lose>Preview wrong-answer sound</button></div><label class="check-label"><input type="checkbox" data-motion ${save.reducedMotion ? "checked" : ""}/> Reduce motion</label><button type="button" data-demo>Show silent example next time</button><button type="button" data-reset>Reset adventure progress</button><p class="storage-status">${storageAvailable ? "Progress saves in this browser." : "This browser is not allowing progress to be saved."}</p></div>`;
     panel.querySelector("[data-close]").onclick = close;
     panel.querySelector("input[type=range]").oninput = (e) => {
       save.volume = +e.target.value;
@@ -728,6 +818,8 @@ function adultSettings() {
       save.taughtFood = false;
       save.taughtRocket = false;
       save.taughtPancake = false;
+      save.taughtFishing = false;
+      save.taughtBalloon = false;
       persist();
       panel.querySelector("[data-demo]").textContent =
         "Example will play before the next activity";
@@ -787,7 +879,28 @@ function fitChefPlate() {
     stage.style.setProperty("--customer-y", `${c.bottom - a.top}px`);
   }
 }
+function fitExploreScene() {
+  const stage = root.querySelector(".fishing-stage"),
+    boat = root.querySelector(".fishing-boat"),
+    line = root.querySelector(".rod-line");
+  if (!stage || !boat || !line) return;
+  const a = stage.getBoundingClientRect(),
+    b = boat.getBoundingClientRect(),
+    x = b.left - a.left + b.width * 0.97,
+    y = b.top - a.top + b.height * 0.075;
+  line.style.left = `${x}px`;
+  line.style.top = `${y}px`;
+  line.style.height = `${Math.max(40, a.height * 0.79 - y)}px`;
+  const caught = root.querySelector(".reeled-catch"),
+    splash = root.querySelector(".pond-splash");
+  for (const el of [caught, splash])
+    if (el) {
+      el.style.left = `${x}px`;
+      el.style.top = `${a.height * 0.78}px`;
+    }
+}
 window.addEventListener("resize", () => {
+  fitExploreScene();
   fitChefPlate();
   fitExpressionHeads();
   fitPilotZoom();

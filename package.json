@@ -1,6 +1,6 @@
 {
   "name": "bar-adventures",
-  "version": "5.0.0",
+  "version": "6.0.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -9,5 +9,5 @@
     "build": "node scripts/build-site.mjs",
     "deploy": "node scripts/deploy-pages.mjs"
   },
-  "description": "Tablet addition races, subtraction meals, and missing-number rocket trips, and pancake cafés for Bar"
+  "description": "Six picture games for Bar with independent level paths: races, meals, rockets, waffles, fishing and balloons"
 }

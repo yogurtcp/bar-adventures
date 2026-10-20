@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import * as j from "../src/journey-model.js";
 import * as p from "../src/pancake-model.js";
-test("café starts after the first rocket, begins small and has diverse customers and valid pairs", () => {
+test("legacy café IDs stay stable; orders begin small with diverse customers and valid pairs", () => {
   assert.equal(j.stageFor("pancake", 1), 8);
   const animals = new Set();
   for (let level = 1; level <= 10; level++)
@@ -32,7 +32,7 @@ test("first tap is tentative, same plate undoes, any valid pair in either order 
         for (const b of q.plates) {
           const r = structuredClone(base),
             s = j.freshSave();
-          s.unlocked = r.stage;
+          s.unlockedByKind.pancake = r.level;
           s.selected = r.stage;
           s.round = r;
           assert.equal(j.submit(r, a.id).graded, false);
@@ -54,9 +54,9 @@ test("every café outcome saves, advances once, and needs four correct orders", 
   for (let level = 1; level <= 10; level++)
     for (let mask = 0; mask < 32; mask++) {
       const s = j.freshSave();
-      s.unlocked = j.stageFor("pancake", level);
-      s.selected = s.unlocked;
-      s.round = j.newRound(s.unlocked, mask + 1);
+      s.unlockedByKind.pancake = level;
+      s.selected = j.stageFor("pancake", level);
+      s.round = j.newRound(s.selected, mask + 1);
       let count = 0;
       for (let i = 0; i < 5; i++) {
         s.round.index = i;
@@ -84,7 +84,7 @@ test("every café outcome saves, advances once, and needs four correct orders", 
     }
 });
 test("v4 migration preserves every existing stage and exact active round, inserts no café completion", () => {
-  const oldStages = j.STAGES.filter((s) => s.kind !== "pancake");
+  const oldStages = j.LEGACY_STAGES.filter((s) => s.kind !== "pancake");
   for (let i = 0; i < oldStages.length; i++) {
     const info = oldStages[i],
       stage = j.stageFor(info.kind, info.level),
@@ -117,13 +117,14 @@ test("v4 migration preserves every existing stage and exact active round, insert
     best: { 34: 6 },
     round: null,
   });
-  assert.equal(s.unlocked, 44);
-  assert.equal(s.selected, 44);
+  assert.equal(s.unlockedByKind.rocket, 10);
+  assert.equal(s.unlockedByKind.pancake, 1);
+  assert.equal(s.selected, 43);
   assert.deepEqual(s.completed, [43]);
 });
 test("tampered plates, duplicate selections, skipped orders and invented outcomes are rejected", () => {
   const s = j.freshSave();
-  s.unlocked = 8;
+  s.unlockedByKind.pancake = 1;
   s.selected = 8;
   s.round = j.newRound(8, 1);
   for (const mutate of [

@@ -66,6 +66,9 @@ const shell = [
   "./assets/race-v2/bar.png",
   "./assets/rocket-v1/ship.png",
   "./assets/objects/egg.webp",
+  ...["fishing", "balloon", "fish"].map(
+    (name) => `./assets/explore-v1/${name}.png`,
+  ),
 ];
 await writeFile(
   new URL("sw.js", output),

@@ -3,8 +3,8 @@ import assert from "node:assert/strict";
 import * as journey from "../src/journey-model.js";
 import * as rocket from "../src/rocket-model.js";
 
-test("six familiar stages precede rockets; every subsequent mission follows another race/food pair", () => {
-  assert.equal(journey.STAGE_COUNT, 44);
+test("legacy stage IDs remain stable when independent paths and new games are added", () => {
+  assert.equal(journey.STAGE_COUNT, 64);
   assert.deepEqual(
     journey.STAGES.slice(0, 6).map((s) => s.kind),
     ["race", "food", "race", "food", "race", "food"],
@@ -52,9 +52,9 @@ test("every flight stops immediately at six cells or three mistakes, survives re
   for (let level = 1; level <= 10; level++)
     for (let mask = 0; mask < 256; mask++) {
       const s = journey.freshSave();
-      s.unlocked = journey.stageFor("rocket", level);
-      s.selected = s.unlocked;
-      s.round = journey.newRound(s.unlocked, mask + 1);
+      s.unlockedByKind.rocket = level;
+      s.selected = journey.stageFor("rocket", level);
+      s.round = journey.newRound(s.selected, mask + 1);
       let cells = 0,
         misses = 0;
       for (let i = 0; i < 8; i++) {
@@ -81,13 +81,13 @@ test("every flight stops immediately at six cells or three mistakes, survives re
         if (terminal) break;
       }
       assert.equal(journey.wonRound(s.round), cells === 6);
-      const oldUnlock = s.unlocked;
+      const oldUnlock = s.unlockedByKind.rocket;
       journey.completeRound(s);
       journey.completeRound(s);
       assert.equal(s.completed.length, cells === 6 ? 1 : 0);
       assert.equal(
-        s.unlocked,
-        cells === 6 ? Math.min(journey.STAGE_COUNT, oldUnlock + 1) : oldUnlock,
+        s.unlockedByKind.rocket,
+        cells === 6 ? Math.min(10, oldUnlock + 1) : oldUnlock,
       );
       assert.equal(
         s.round.tasks.filter((q) => q.resolved).length,
@@ -131,7 +131,7 @@ test("v3 migration preserves exact unfinished races and meals, maps best results
 });
 test("tampered rocket saves and flights continuing after an outcome are rejected", () => {
   const s = journey.freshSave();
-  s.unlocked = 7;
+  s.unlockedByKind.rocket = 1;
   s.selected = 7;
   s.round = journey.newRound(7, 8);
   const tampered = structuredClone(s);
@@ -154,7 +154,7 @@ test("tampered rocket saves and flights continuing after an outcome are rejected
   assert.equal(journey.normalizeSave(s).round, null);
 });
 
-test("a previously completed final food stage unlocks the newly added last rocket without a replay", () => {
+test("legacy food completions retain food access without completing new game paths", () => {
   const old = {
     ...journey.freshSave(),
     version: 3,
@@ -163,13 +163,14 @@ test("a previously completed final food stage unlocks the newly added last rocke
     completed: Array.from({ length: 24 }, (_, i) => i + 1),
   };
   const next = journey.migrateJourneySave(old);
-  assert.equal(next.unlocked, journey.stageFor("rocket", 10));
-  assert.equal(next.selected, journey.stageFor("rocket", 10));
+  assert.equal(next.unlockedByKind.rocket, 1);
+  assert.equal(next.unlockedByKind.food, 12);
+  assert.equal(next.selected, journey.stageFor("food", 12));
   assert.equal(next.completed.length, 24);
   assert.ok(!next.completed.includes(journey.stageFor("rocket", 10)));
 });
 
-test("completed legacy race levels unlock their inserted meal without marking it passed", () => {
+test("completed legacy races preserve race progress and keep new activities at their first level", () => {
   const save = journey.migrateRaceSave({
     version: 2,
     unlocked: 12,
@@ -177,7 +178,8 @@ test("completed legacy race levels unlock their inserted meal without marking it
     completed: [12],
     best: { 12: 8 },
   });
-  assert.equal(save.unlocked, journey.stageFor("food", 12));
-  assert.equal(save.selected, save.unlocked);
+  assert.equal(save.unlockedByKind.race, 12);
+  assert.equal(save.unlockedByKind.food, 1);
+  assert.equal(save.selected, journey.stageFor("race", 12));
   assert.deepEqual(save.completed, [journey.stageFor("race", 12)]);
 });

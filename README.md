@@ -1,110 +1,84 @@
 # Bar’s Adventures
 
-The game follows one scrolling route with **44 stages**: twelve addition races, twelve subtraction meals, ten missing-number rocket missions, and ten pancake cafés. The first six stages are race/food pairs; the first rocket is stage 7. The first café is stage 8; later rounds follow race → food → rocket → café. Other activities remain hidden.
+**[Play Bar’s Adventures](https://yogurtcp.github.io/bar-adventures/)** · [Source code](https://github.com/yogurtcp/bar-adventures)
 
-**[Play Bar’s Adventures](https://yogurtcp.github.io/bar-adventures/)**
+Six picture-based games for Bar, with generated pixel art, expressive animal friends, playful sounds, tablet layouts, and no narration or thinking-time limit.
 
-[Source code](https://github.com/yogurtcp/bar-adventures)
+## Pick a game
 
-## Deploy
+Each game has **its own squiggly level path**. The first level of all six games is open immediately. A win unlocks only the next level of that same game; other paths keep their own progress. Passed levels have checks, the current level has a gold flag, and later levels have padlocks. Scroll vertically between game cards and swipe horizontally along each path. Levels are numbered separately within each game.
 
-Push source changes to `main`, then run `npm run deploy` to test, build and publish the game to the `gh-pages` branch. GitHub Pages automatically publishes that branch. The deploy command uses Git and an authenticated GitHub CLI (`gh`), keeps the working checkout untouched, and needs no workflow token scope. `npm run build` produces the standalone static site in `dist/`; no backend or dependencies are required. Asset paths work at both the local root and the GitHub Pages repository subpath. Built code and styles share a content-versioned folder so tablets load a consistent set of modules after deployment. Player progress is local to each browser and site origin.
+The café starts with **waffles**. Its two picture buttons switch between pancakes and waffles without changing its questions or progress.
+
+There are 64 levels: 12 races, 12 meals, and 10 each for rockets, café, fishing and balloons. Existing stage IDs stay stable internally so older saved questions still resume exactly; the child sees the level number within the selected game.
+
+Wins show a celebration and automatically return to the map with the next level of the same game selected. A prominent map button and replay are also available on results. There is no direct next-game shortcut or between-question next button.
+
+## Games
+
+| Game                  | What Bar does                                                                                                                                                            | Easy starting point                                                                                         | Pass rule                                                                                  |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| Car race              | Drives a red car against visible bunny, fox and panda karts. Correct answers boost his actual position; mistakes let rivals gain ground.                                 | Addition within five, two choices; later totals up to ten and more choices.                                 | Six first-try answers from eight; mistakes allow a supported retry.                        |
+| Feed Bar              | Receives healthy food or a silly yucky item, with chewing/eww reactions. Collected food makes him visibly stronger.                                                      | Subtraction within five; later within ten.                                                                  | Seven food points from ten possible. Sweets on questions 3 and 7 are double bonuses.       |
+| Rocket trip           | Fills missing numbers, earns power cells and flies between real checkpoints.                                                                                             | `□ + 1 = 2`, two choices, totals up to three. Subtraction appears only in later rocket levels.              | Six cells before three mistakes, at most eight questions.                                  |
+| Pancake / waffle café | Chooses two physical stacks to match an animal’s order; Bar serves the combined stack. Any valid pair in either order works. Tap the first selected plate again to undo. | Orders of three or four, three plates, countable food and remaining outlines.                               | Four correct orders from five. Wrong orders show the actual sum, then a valid worked pair. |
+| Fishing               | Matches a requested numeral to a school of fish. Bar reels in that exact number; a wrong choice catches a funny boot.                                                    | Groups of 1–3 fish, two choices; later up to ten with four choices.                                         | Four successful catches from six. Every pictured fish is a separate sprite.                |
+| Balloon adventure     | Chooses `>`, `<` or `=` between two numbers and visible groups of apples. Correct comparisons raise his balloon toward a cloud castle.                                   | Unequal numbers up to three, only greater/less choices. Equality starts at level 3; later values reach ten. | Four stars from six comparisons. Mistakes produce a puzzled face and a gentle puff.        |
+
+Every game has an unscored, speech-free first-visit example, replayable through the hand icon. Feedback shows a large Bar expression. Animal taps trigger species-specific cartoon sounds and expressions without affecting answers, scores, positions, or progression. Shared mute, volume and reduced-motion controls apply throughout.
+
+## Progress and settings
+
+Normal progress saves under `bar-journey-v6`, including independent per-game unlocks, passed levels, best scores, exact unfinished questions and café plate selections. Version 5, 4 and 3 adventure records and version 2 race records migrate without rewriting the original records. Earned access is preserved; new games begin at level 1. Debug saves remain separate and are not used in normal play.
+
+`DEBUG_UNLOCK_ALL_LEVELS` in `src/config.js` remains **false**. Opening each game’s first level is normal progression, not debug access. Parent settings are protected by an arithmetic check and contain sound volume, motion preference, tutorial reset and progress reset.
 
 ## Install on a tablet
 
-Open the [public game](https://yogurtcp.github.io/bar-adventures/) and tap **Bar’s portrait with the download arrow** at the top of the map. In Chrome, confirm **Install**, then launch Bar’s icon from the home screen or app list. The installed game uses a standalone app window without browser tabs or the address bar. The install control hides in standalone mode.
+Open the [public HTTPS game](https://yogurtcp.github.io/bar-adventures/) and tap **Bar’s portrait with the download arrow** at the top of the map. In Chrome, confirm **Install**, then launch Bar’s home-screen/app-list icon. The installed game uses a standalone window without browser tabs or the address bar; its install control is hidden.
 
-If the browser does not offer its native prompt, the same button opens short instructions. On iPad/iPhone, use **Share → Add to Home Screen → Add**; keep **Open as Web App** enabled if offered. The generated Bar portrait supplies the Android app icon, Apple home-screen icon, and browser favicon. Installation behavior follows the browser’s [PWA installation support](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Installing).
+If the native prompt is unavailable, the button opens platform-specific instructions. On iPad/iPhone, use **Share → Add to Home Screen → Add**, keeping **Open as Web App** enabled if offered. See the browser’s [PWA installation support](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Installing).
 
-The public HTTPS site supports installation; ordinary HTTP LAN addresses are for browser play. The app shell and map art are cached for offline launches, with additional artwork cached as it is used. New, unseen artwork may still need a connection. App launches check for updates, and a new service worker waits for existing game windows/tabs to close rather than interrupting play. Caching never changes player saves or stage locks; progress remains local to the browser/app environment.
-
-Assets: `public/assets/app-v1/`. Built-in imagegen prompt and provenance: [`art-source/APP_ICON_V1_PROMPT.md`](art-source/APP_ICON_V1_PROMPT.md).
+The app shell and map artwork cache for offline launches; other artwork caches as used, so unseen artwork may still need a connection. App launches check for updates. A new worker waits for existing game windows/tabs to close rather than interrupting play. Cached files never change player saves or stage locks. Progress remains local to the browser/app environment.
 
 ## Run locally
 
 ```sh
-cd /home/yevgeny/Documents/work/bar-adventures
 npm start
 ```
 
-Open **http://localhost:4173**. No dependency installation is needed: runtime uses browser APIs and Node’s built-in HTTP server. For a tablet on the same Wi-Fi, use this computer’s LAN address with port 4173. The server binds to the local network; the public version is hosted separately on GitHub Pages.
+Open **http://localhost:4173**. No dependency installation is required: runtime uses native browser APIs and Node’s built-in server. For browser play on a tablet on the same Wi-Fi, use the computer’s LAN address and port 4173. Install from the public HTTPS URL.
 
-## What Bar plays
-
-- The start screen shows the scrolling, numbered 44-stage map, with Bar’s car for races, an egg for meals, his spaceship for rocket missions, and a pancake stack for cafés. Passed stages have green checkmarks, locked stages have padlocks, and the current stage has a gold highlight with an activity picture and a flag. Tap a stage to play it, or use the large play button to resume the selected stage. Passed stages remain replayable.
-- Four independent transparent car sprites show Bar, bunny, fox, and panda driving. Their positions are actual saved race progress, animated across four lanes toward a visible finish line.
-- Races use one addition problem at a time. Activity levels 1–3 stay within five and offer two answers; later levels stay within ten and offer three, then four answers.
-- Correct first attempts give a substantial boost. A wrong answer lets the animals gain ground; a successful retry gives Bar a smaller recovery boost. The same question stays visible, rejected choices are disabled, and additional quantity help appears after mistakes.
-- Thinking time never changes positions. A race has eight questions; six correct first attempts wins. The last answer triggers a visible sprint across the finish before the illustrated ending. Each possible animal winner has a matching ending. A win shows the victory picture briefly, then automatically returns to the start map with the next stage selected. Every game returns through the map between stages; the result screen also has a prominent map button, with no direct start-next-stage shortcut.
-- Solved questions advance automatically after a 2.4-second reward; there is no between-question next button. Mistakes retain the question and allow retry after the reaction. Bar’s head briefly enlarges to 3.5× on his own car to emphasize each new expression.
-- No speech or written instructions in the child flow. There are short nonverbal sounds, mute, a first-visit silent demonstration, and a replay-example hand icon.
-- Progress saves locally, including the exact unfinished question and rejected choices. Existing race-level unlocks migrate from the previous version. Reset and volume/motion settings are inside the protected parent panel.
-
-## Food stages
-
-- A single kitchen scene shows full-body pixel Bar and the food offered for the current subtraction question. Correct answers send the food to Bar, who chews happily; wrong choices bring a frog, sock, shoe or snail and an exaggerated “eww” reaction. Yucky items fly toward his face too, with three rotating synthesized “eww” vocal sounds timed to their arrival.
-- There are eight questions, with double-reward sweets on questions three and seven. The gold **×2** badge and a short chime announce them. Normal food earns one point; sweets earn two. Seven of ten possible food points passes the stage.
-- Food questions have one attempt. After either reaction the next question appears automatically; wrong answers briefly reveal the correct result. Race retries retain their existing behavior.
-- Bar starts with three energy units. Correct answers add their food reward and wrong answers remove one energy unit. Low energy shows slumped shoulders and a sad face; high energy shows a bigger, flexing, smiling Bar. Thinking time never drains energy. A tray shows every earned food point, including both bonus rewards.
-- Five new generated character poses cover ready, eating, disgusted, tired and strong. No speech or child-facing words. Correct/wrong answers use the six existing sound variations per set.
-- Food wins show a strong, happy finale and then return to the map. Losses show tired Bar with replay and map controls. Progress, unfinished questions and activity difficulty persist in the browser.
-- Existing race and food progress migrates by activity and difficulty level when rocket missions are inserted. Completed stages, best results and unfinished questions are preserved; new rocket stages are not marked passed.
-
-## Rocket missions
-
-- The first rocket is **stage 7**, after three race/food pairs. Further rocket missions are stages 11, 15, 19, 23, 27, 31, 35, 39 and 43. Rocket difficulty is independent of the race and food difficulty.
-- Mission 1 starts with `□ + 1 = 2`, only two answer choices, totals no larger than three, and a dot frame showing known and missing quantities. Missions 2–3 keep addition and a missing left operand, with totals up to four and five. Mission 4 introduces the missing right operand; missions 5–7 gradually increase addition range and choice count. Only missions 8–10 introduce subtraction. Every value and answer stays between zero and ten.
-- Correct choices fill the actual missing operand, charge a power cell and visibly fly Bar’s rocket to the next of six checkpoints. Mistakes cause a funny engine hiccup and a puzzled cockpit close-up, then show the correct equation and advance. The rocket does not move while the child thinks.
-- Six cells wins immediately; three mistakes ends the mission immediately. There are at most eight questions, with no extra questions after the outcome is settled. Answers auto-advance and no next button is used.
-- Bar remains visible inside the generated ship. A large, cropped cockpit portrait briefly emphasizes his new expression. Space engine sounds accompany the existing rotating answer music, with shared mute and volume.
-- A win shows Bar planting a moon flag with a tiny alien, then returns to the map. A loss shows a gentle return to Earth with an alien mechanic, with replay/map controls. A separate silent example demonstrates filling the missing box.
-- Five new generated assets and exact prompts are in `public/assets/rocket-v1/` and `art-source/ROCKET_V1_PROMPTS.md`.
-
-## Pancake café
-
-- Cafés are stages **8, 12, 16, 20, 24, 28, 32, 36, 40 and 44**, after rocket missions. Bar wears a chef hat and apron, with ready, delighted/thumbs-up and surprised/pancake-on-hat poses. A large expression close-up appears during feedback.
-- A customer orders a total, shown by both a picture and a number. Tap two distinct plates to combine their pancakes. Any pair making the order is accepted, in either order. Tap the first selected plate again to undo. Two separate plates of two can make four. The second plate automatically submits, with no Serve or Next button.
-- Café 1 uses only totals of three or four and three choices, with countable pancakes and remaining outlines. Later cafés use four plates and gradually reach totals of ten. Each has five orders; four correct orders wins. There is no time limit.
-- Correct stacks combine on Bar’s actual plate, travel to the customer, and disappear as the animal celebrates and munches. Wrong orders wobble, Bar gets a pancake on his hat, and the animal looks surprised. The actual sum appears first, followed by a correct worked pair, then the next order starts automatically.
-- A win brings all six animals together and returns to the map. A loss offers replay and map controls. A silent first-visit example demonstrates choosing two plates. Partial selections survive refresh.
-- Six customers—bunny, fox, panda, kitten, puppy and penguin—each have generated waiting, delighted and surprised poses. Five different customers appear per round. Animals throughout the café, race, kitchen and rocket games are tappable: they wiggle, change expression and make short species-specific cartoon sounds. Taps never change answers, scores, positions or progress. Voices have three variations per species, share mute/volume, and contain no narration.
-- Built-in imagegen assets are saved in `public/assets/cafe-v1/`; exact prompts and provenance are in [`art-source/CAFE_V1_PROMPTS.md`](art-source/CAFE_V1_PROMPTS.md). Pancake stacks are rendered in code so their counts always match the math.
-- Existing stage progress migrates by activity and difficulty, preserving completions, best scores and exact unfinished questions. Newly inserted cafés are not marked passed. Debug and normal records remain separate.
-
-## Code map
-
-- `src/pancake-model.js`, `src/pancake-view.js`, `src/pancake.css`: pair selection, countable stacks, café customers, serving, reactions and outcomes.
-- `src/animal-view.js`, `src/animals.css`, `src/animal-sound.js`: shared tappable animal poses and locally synthesized voices.
-- `src/install.js`, `src/install.css`, `public/manifest.webmanifest`, `sw.js`: install control, platform instructions, standalone metadata and scoped caching. The build versions the worker and precaches the generated app shell.
-- `src/app.js`: screens, shared input locking, automatic transitions, map scrolling and persistence.
-- `src/journey-model.js`: activity schedule, v2/v3/v4 save migration, subtraction generation, food rewards, energy and completion.
-- `src/rocket-model.js`, `src/rocket-view.js`, `src/rocket.css`: easy-to-hard missing-number questions, early mission outcomes, flight movement, cockpit reactions and endings.
-- `src/food-view.js`, `src/food.css`: kitchen, food animation, Bar expressions and scrolling map.
-- `public/assets/food-v1/`: five generated Bar sprites; prompts in `art-source/FOOD_V1_PROMPTS.md`.
-- `src/race-sound.js`: layered nonverbal engine/whoosh, sparkle, tap and finish sounds with immediate master mute.
-- `src/race-endings.js`: six win and six loss musical cartoons, synthesized brass/strings/bells/boings, and a shuffle bag that avoids repeats.
-- `src/race-model.js`: addition generation, grading, race distances, result thresholds and save validation.
-- `src/race-art.js`: icons and code-native pixel scenery.
-- `src/style.css`: responsive layout, car movement and feedback animation.
-- `public/assets/race-v2/`: four generated transparent drivers/cars, two matching Bar reaction variants, and four finish illustrations. All runtime art is local. The original photograph is not served or copied here.
-- `art-source/RACE_V2_PROMPTS.md`: generation prompts and asset provenance.
-- `artifacts/review-v2/`: browser screenshots and review reports.
-- `artifacts/app-v1.js`, `style-v1.css`, `index-v1.html`: previous implementation backups, excluded from the served app.
-
-Art review: **http://localhost:4173/art-gallery.html**. This adult review page has labels; the game does not.
-
-## Checks
+## Build and deploy
 
 ```sh
 npm test
+npm run build
+npm run deploy
 ```
 
-The 29 tests cover every eight-answer history for all twelve race and food levels, subtraction choices, double rewards, energy, save recovery, race migration, retries, debug access and retained progress. Rocket tests also cover every answer history at all ten difficulties, early stopping, migration, the six-stage prerequisite, all café answer histories, every plate pair, selection undo/reload, tampered café saves v4 migration, install metadata, exact icon sizes, offline caching, update handling and cache isolation. See `IMPLEMENTATION_STATUS.md` for actual browser checks and remaining limitations.
+Push source to `main`, then run `npm run deploy` to test, build and publish the static site to `gh-pages`. The deploy script uses Git and an authenticated GitHub CLI, keeps the working checkout untouched and requires no workflow token scope. GitHub Pages publishes that branch.
 
-## Temporary debug access
+The build creates `dist/`, fingerprints all source modules/styles together, emits the manifest and a versioned service worker, and supports both root and `/bar-adventures/` hosting. The shell precaches atomically, navigation checks the network first, and old workers/caches retire only within this app’s scope. No backend or external runtime assets are required.
 
-`DEBUG_UNLOCK_ALL_LEVELS` in `src/config.js` is disabled. New players start at stage 1; wins unlock the next stage, and passed stages remain replayable. Normal adventure progress uses `bar-journey-v5`. Previous debug records under `bar-journey-v5-debug` remain separate and do not unlock normal stages. Previous v4/v3 adventure and v2 race records are retained for migration and left untouched.
+## Code and artwork
 
-## Answer sounds
+- `src/journey-model.js`: activity catalog, independent unlocks, stable stage IDs, save validation/migration, food rewards and completion.
+- `src/trails-view.js`, `src/trails.css`: six picture-led squiggly paths, current/passed/locked states and café style selection.
+- `src/explore-model.js`, `src/explore-view.js`, `src/explore.css`: fishing counts, balloon comparisons, animated progress, expressions, tutorials and endings.
+- `src/pancake-model.js`, `src/pancake-view.js`, `src/pancake.css`: two-plate café selection, countable pancakes/waffles and customer reactions.
+- `src/race-model.js`, `src/race-art.js`, `src/style.css`: race questions, actual car positions, pixel scenery and shared layouts.
+- `src/food-view.js`, `src/food.css`, `src/rocket-model.js`, `src/rocket-view.js`, `src/rocket.css`: food and rocket scenes, questions and rewards.
+- `src/animal-view.js`, `src/animals.css`, `src/animal-sound.js`, `src/race-sound.js`, `src/race-endings.js`, `src/food-sound.js`: cosmetic animal interactions, six correct/wrong music variations per set and short locally synthesized effects. No speech APIs.
+- `src/app.js`: screens, input locking, automatic transitions, persistence, layout fitting and sound integration.
+- `src/install.js`, `src/install.css`, `public/manifest.webmanifest`, `sw.js`: install experience, standalone mode and scoped caching.
 
-Every correct answer plays a celebration, and every wrong choice plays a funny mishap sound, including retries. Each set rotates through six variations before any repeats. Correct answers: trumpet parade, plucky string sprint, boing party, disco dash, tiny orchestra, magic confetti. Wrong answers: wobbly trombone, tiptoe strings, rubber wheels, kazoo pit stop, xylophone tumble, tiny dramatic violin. The reaction holds long enough for each clip to finish before the next answer. The finish-line engine cue remains separate; the musical sets play during questions. All are short, nonverbal and respect the shared mute/volume controls. Open Parent settings, pass the arithmetic check, and use the two preview buttons to hear the sets without playing a race.
+New art: [`public/assets/explore-v1/`](public/assets/explore-v1/) with ready/happy/surprised fishing and balloon sprite sheets plus six fish designs. Exact built-in imagegen prompts and provenance: [`art-source/EXPLORE_V1_PROMPTS.md`](art-source/EXPLORE_V1_PROMPTS.md).
+
+Earlier generated art remains in `public/assets/race-v2/`, `food-v1/`, `rocket-v1/`, `cafe-v1/` and `app-v1/`, with corresponding prompt files in `art-source/`. Native shapes render the exact counts of pancakes, waffles, apples and fish; generated illustrations never determine the math. The original family photograph is not served or copied into this repository.
+
+Adult art review: **http://localhost:4173/art-gallery.html**. The game itself uses pictures, symbols and numbers.
+
+## Verification
+
+All 34 tests cover exhaustive race, food, rocket, café and new-game answer histories; independent path progression; initial access; idempotent completion; valid questions; tampered-save rejection; exact migrations; PWA metadata/icon dimensions and scoped offline/update behavior. Browser reviews cover real touch-input wins/losses, map return, per-game unlocks, animal taps, tutorials, waffle selection, resume, migration, tablet layouts and installation metadata. Details and physical-device limitations are in `IMPLEMENTATION_STATUS.md`. Screenshots/reports live in ignored `artifacts/`.

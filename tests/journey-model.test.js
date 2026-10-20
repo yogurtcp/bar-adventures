@@ -29,7 +29,8 @@ test("double sweets affect the outcome; every food history has consistent energy
   ))
     for (let history = 0; history < 256; history++) {
       const s = journey.freshSave();
-      s.unlocked = stage;
+      s.unlockedByKind[journey.stageInfo(stage).kind] =
+        journey.stageInfo(stage).level;
       s.selected = stage;
       s.round = journey.newRound(stage, 445);
       let points = 0,
@@ -65,8 +66,8 @@ test("double sweets affect the outcome; every food history has consistent energy
       assert.equal(s.completed.includes(stage), points >= 7);
       assert.equal(s.completed.length, points >= 7 ? 1 : 0);
       assert.equal(
-        s.unlocked,
-        points >= 7 ? Math.min(journey.STAGE_COUNT, stage + 1) : stage,
+        s.unlockedByKind.food,
+        Math.min(12, journey.stageInfo(stage).level + (points >= 7 ? 1 : 0)),
       );
       if (points >= 7) assert.ok(journey.foodProgress(s.round).energy >= 7);
     }
@@ -88,7 +89,7 @@ test("race migration preserves exact unfinished work and earned results at the n
   const before = JSON.stringify(old);
   const save = journey.migrateRaceSave(old);
   assert.equal(JSON.stringify(old), before);
-  assert.equal(save.unlocked, journey.stageFor("race", 4));
+  assert.equal(save.unlockedByKind.race, 4);
   assert.equal(save.selected, 5);
   assert.deepEqual(save.completed, [1, 3]);
   assert.deepEqual(save.best, { 1: 8, 3: 6 });
@@ -107,7 +108,8 @@ test("malformed food saves are rejected; debug access and completed replays pres
     journey.normalizeSave(s, { unlockAllLevels: true }).round.stage,
     stage,
   );
-  s.unlocked = stage;
+  s.unlockedByKind[journey.stageInfo(stage).kind] =
+    journey.stageInfo(stage).level;
   const changed = structuredClone(s);
   changed.round.tasks[0].answer = 99;
   assert.equal(journey.normalizeSave(changed).round, null);

@@ -1,4 +1,11 @@
 import {
+  makeExploreQuestions,
+  submitExplore,
+  validExploreRound,
+  exploreScore,
+  EXPLORE_GOAL,
+} from "./explore-model.js";
+import {
   makePancakeQuestions,
   submitPancake,
   pancakeScore,
@@ -14,7 +21,7 @@ import {
   validRocketRound,
 } from "./rocket-model.js";
 
-export const SAVE_KEY = "bar-journey-v5";
+export const SAVE_KEY = "bar-journey-v6";
 export const FOOD_GOAL = 7;
 // Build confidence with three complete race/food pairs before the first rocket.
 export const STAGES = [];
@@ -26,6 +33,40 @@ for (let level = 1; level <= 12; level++) {
       { kind: "pancake", level: level - 2 },
     );
 }
+// Preserve the 44 existing IDs so saved games keep exactly their questions.
+export const LEGACY_STAGES = [...STAGES];
+for (let level = 1; level <= 10; level++)
+  STAGES.push({ kind: "fishing", level }, { kind: "balloon", level });
+export const GAME_TYPES = [
+  { kind: "race", name: "Car race", levels: 12, color: "#d47b67" },
+  { kind: "food", name: "Feed Bar", levels: 12, color: "#82a66e" },
+  { kind: "rocket", name: "Rocket trip", levels: 10, color: "#8d85bd" },
+  {
+    kind: "pancake",
+    name: "Pancakes and waffles",
+    levels: 10,
+    color: "#cfaa59",
+  },
+  { kind: "fishing", name: "Fishing", levels: 10, color: "#63a9b8" },
+  { kind: "balloon", name: "Balloon adventure", levels: 10, color: "#cf8eae" },
+];
+export const gameInfo = (kind) => GAME_TYPES.find((game) => game.kind === kind);
+export function isStageUnlocked(save, stage, { unlockAllLevels = false } = {}) {
+  const info = stageInfo(stage);
+  return (
+    !!gameInfo(info.kind) &&
+    (unlockAllLevels || info.level <= (save.unlockedByKind?.[info.kind] || 1))
+  );
+}
+export const currentStage = (save, kind) =>
+  stageFor(kind, save.unlockedByKind?.[kind] || 1);
+export const nextStageOf = (stage) => {
+  const info = stageInfo(stage);
+  return stageFor(
+    info.kind,
+    Math.min(gameInfo(info.kind).levels, info.level + 1),
+  );
+};
 export const STAGE_COUNT = STAGES.length;
 export const stageInfo = (stage) => ({ stage, ...STAGES[stage - 1] });
 export const stageFor = (kind, level) =>
@@ -73,17 +114,21 @@ export function foodProgress(round) {
   };
 }
 export function wonRound(round) {
-  return round.kind === "pancake"
-    ? pancakeScore(round) >= PANCAKE_GOAL
-    : round.kind === "rocket"
-      ? rocketProgress(round).cells >= ROCKET_GOAL
-      : round.kind === "food"
-        ? foodProgress(round).points >= FOOD_GOAL
-        : race.score(round) >= race.WIN_SCORE;
+  return ["fishing", "balloon"].includes(round.kind)
+    ? exploreScore(round) >= EXPLORE_GOAL
+    : round.kind === "pancake"
+      ? pancakeScore(round) >= PANCAKE_GOAL
+      : round.kind === "rocket"
+        ? rocketProgress(round).cells >= ROCKET_GOAL
+        : round.kind === "food"
+          ? foodProgress(round).points >= FOOD_GOAL
+          : race.score(round) >= race.WIN_SCORE;
 }
 export function newRound(stage, seed) {
   const info = stageInfo(stage);
   const round = { ...race.newRound(info.level, seed), ...info };
+  if (["fishing", "balloon"].includes(info.kind))
+    round.tasks = makeExploreQuestions(info.kind, info.level, round.seed);
   if (info.kind === "pancake")
     round.tasks = makePancakeQuestions(info.level, round.seed);
   if (info.kind === "rocket")
@@ -115,6 +160,8 @@ export function newRound(stage, seed) {
   return round;
 }
 export function submit(round, value) {
+  if (["fishing", "balloon"].includes(round.kind))
+    return submitExplore(round, value);
   if (round.kind === "pancake") return submitPancake(round, value);
   if (round.kind === "rocket") return submitRocket(round, value);
   if (round.kind !== "food") return race.submit(round, value);
@@ -129,19 +176,25 @@ export function submit(round, value) {
   return { accepted: true, correct, firstTry: correct };
 }
 export function freshSave() {
+  const { unlocked, ...base } = race.freshSave();
   return {
-    ...race.freshSave(),
-    version: 5,
+    ...base,
+    version: 6,
+    unlockedByKind: Object.fromEntries(GAME_TYPES.map((g) => [g.kind, 1])),
     taughtFood: false,
     taughtRocket: false,
     taughtPancake: false,
+    taughtFishing: false,
+    taughtBalloon: false,
+    cafeStyle: "waffle",
   };
 }
 export function completeRound(save) {
   const r = save.round;
   if (!r || r.status !== "finished") return;
-  const points =
-    r.kind === "pancake"
+  const points = ["fishing", "balloon"].includes(r.kind)
+    ? exploreScore(r)
+    : r.kind === "pancake"
       ? pancakeScore(r)
       : r.kind === "rocket"
         ? rocketProgress(r).cells
@@ -151,96 +204,97 @@ export function completeRound(save) {
   save.best[r.stage] = Math.max(save.best[r.stage] || 0, points);
   if (wonRound(r)) {
     if (!save.completed.includes(r.stage)) save.completed.push(r.stage);
-    save.unlocked = Math.max(save.unlocked, Math.min(STAGE_COUNT, r.stage + 1));
-    if (save.selected <= r.stage)
-      save.selected = Math.min(STAGE_COUNT, r.stage + 1);
+    save.unlockedByKind[r.kind] = Math.max(
+      save.unlockedByKind[r.kind],
+      Math.min(gameInfo(r.kind).levels, r.level + 1),
+    );
+    save.selected = nextStageOf(r.stage);
   }
 }
-export function migrateRaceSave(raw, options) {
-  const old = race.normalizeSave(raw, options);
-  const map = (n) => stageFor("race", n);
-  const completed = old.completed.map(map);
-  const unlocked = Math.max(
-    map(old.unlocked),
-    ...completed.map((n) => Math.min(STAGE_COUNT, n + 1)),
-  );
+function convertLegacy(raw, oldStages, options) {
+  const base = freshSave(),
+    count = oldStages.length;
+  const valid = (n) => Number.isInteger(n) && n >= 1 && n <= count;
+  const map = (n) =>
+    valid(n) ? stageFor(oldStages[n - 1].kind, oldStages[n - 1].level) : 1;
+  const completed = Array.isArray(raw.completed)
+    ? raw.completed.filter(valid).map(map)
+    : [];
+  const oldLimit = valid(raw.unlocked) ? raw.unlocked : 1;
+  for (const item of oldStages.slice(0, oldLimit))
+    base.unlockedByKind[item.kind] = Math.max(
+      base.unlockedByKind[item.kind],
+      item.level,
+    );
+  for (const n of completed) {
+    const info = stageInfo(n);
+    base.unlockedByKind[info.kind] = Math.max(
+      base.unlockedByKind[info.kind],
+      Math.min(gameInfo(info.kind).levels, info.level + 1),
+    );
+  }
+  const selected = map(raw.selected);
   return normalizeSave(
     {
-      ...old,
-      version: 5,
-      unlocked,
+      ...raw,
+      version: 6,
+      unlockedByKind: base.unlockedByKind,
       selected:
-        (!old.round || old.round.status === "finished") &&
-        old.selected === old.unlocked &&
-        old.completed.includes(old.unlocked)
-          ? unlocked
-          : map(old.selected),
+        (!raw.round || raw.round.status === "finished") &&
+        completed.includes(selected)
+          ? nextStageOf(selected)
+          : selected,
       completed,
       best: Object.fromEntries(
-        Object.entries(old.best).map(([n, v]) => [map(+n), v]),
+        Object.entries(raw.best || {})
+          .filter(([n]) => valid(+n))
+          .map(([n, v]) => [map(+n), v]),
       ),
-      round: old.round
-        ? { ...old.round, stage: map(old.round.level), kind: "race" }
+      round: raw.round
+        ? {
+            ...raw.round,
+            stage: map(raw.round.stage || raw.round.level),
+            kind: raw.round.kind || "race",
+          }
         : null,
     },
     options,
   );
 }
-export function migrateJourneySave(raw, options) {
-  if (!raw || ![3, 4].includes(raw.version)) return freshSave();
-  const oldStages =
-    raw.version === 4
-      ? STAGES.filter((s) => s.kind !== "pancake")
-      : Array.from({ length: 24 }, (_, i) => ({
-          kind: i % 2 ? "food" : "race",
-          level: Math.floor(i / 2) + 1,
-        }));
-  const oldCount = oldStages.length;
-  const map = (n) =>
-    Number.isInteger(n) && n >= 1 && n <= oldCount
-      ? stageFor(oldStages[n - 1].kind, oldStages[n - 1].level)
-      : 1;
-  const completed = Array.isArray(raw.completed)
-    ? raw.completed
-        .filter((n) => Number.isInteger(n) && n >= 1 && n <= oldCount)
-        .map(map)
-    : [];
-  const unlocked = Math.max(
-    map(raw.unlocked),
-    ...completed.map((n) => Math.min(STAGE_COUNT, n + 1)),
-  );
-  return normalizeSave(
-    {
-      ...raw,
-      version: 5,
-      unlocked,
-      selected:
-        (!raw.round || raw.round.status === "finished") &&
-        raw.selected === raw.unlocked &&
-        Array.isArray(raw.completed) &&
-        raw.completed.includes(raw.unlocked)
-          ? unlocked
-          : map(raw.selected),
-      completed,
-      best: Object.fromEntries(
-        Object.entries(raw.best || {})
-          .filter(([n]) => Number.isInteger(+n) && +n >= 1 && +n <= oldCount)
-          .map(([n, v]) => [map(+n), v]),
-      ),
-      round: raw.round ? { ...raw.round, stage: map(raw.round.stage) } : null,
-    },
+export function migrateRaceSave(raw, options) {
+  const old = race.normalizeSave(raw, options);
+  return convertLegacy(
+    old,
+    Array.from({ length: 12 }, (_, i) => ({ kind: "race", level: i + 1 })),
     options,
   );
 }
+export function migrateJourneySave(raw, options) {
+  if (!raw || ![3, 4, 5].includes(raw.version)) return freshSave();
+  const oldStages =
+    raw.version === 5
+      ? LEGACY_STAGES
+      : raw.version === 4
+        ? LEGACY_STAGES.filter((s) => s.kind !== "pancake")
+        : Array.from({ length: 24 }, (_, i) => ({
+            kind: i % 2 ? "food" : "race",
+            level: Math.floor(i / 2) + 1,
+          }));
+  return convertLegacy(raw, oldStages, options);
+}
 export function normalizeSave(raw, { unlockAllLevels = false } = {}) {
   const save = freshSave();
-  if (!raw || raw.version !== 5) return save;
+  if (!raw || raw.version !== 6) return save;
   const bounded = (n, lo, hi) => Number.isInteger(n) && n >= lo && n <= hi;
-  save.unlocked = bounded(raw.unlocked, 1, STAGE_COUNT) ? raw.unlocked : 1;
-  const limit = unlockAllLevels ? STAGE_COUNT : save.unlocked;
-  save.selected = bounded(raw.selected, 1, limit)
-    ? raw.selected
-    : save.unlocked;
+  for (const game of GAME_TYPES) {
+    const n = raw.unlockedByKind?.[game.kind];
+    save.unlockedByKind[game.kind] = bounded(n, 1, game.levels) ? n : 1;
+  }
+  save.selected =
+    bounded(raw.selected, 1, STAGE_COUNT) &&
+    isStageUnlocked(save, raw.selected, { unlockAllLevels })
+      ? raw.selected
+      : 1;
   save.completed = Array.isArray(raw.completed)
     ? [...new Set(raw.completed.filter((n) => bounded(n, 1, STAGE_COUNT)))]
     : [];
@@ -251,13 +305,15 @@ export function normalizeSave(raw, { unlockAllLevels = false } = {}) {
         bounded(
           v,
           0,
-          stageInfo(+n).kind === "pancake"
-            ? 5
-            : stageInfo(+n).kind === "food"
-              ? 10
-              : stageInfo(+n).kind === "rocket"
-                ? 6
-                : 8,
+          ["fishing", "balloon"].includes(stageInfo(+n).kind)
+            ? 6
+            : stageInfo(+n).kind === "pancake"
+              ? 5
+              : stageInfo(+n).kind === "food"
+                ? 10
+                : stageInfo(+n).kind === "rocket"
+                  ? 6
+                  : 8,
         )
       )
         save.best[n] = v;
@@ -272,10 +328,14 @@ export function normalizeSave(raw, { unlockAllLevels = false } = {}) {
   save.taughtFood = raw.taughtFood === true;
   save.taughtRocket = raw.taughtRocket === true;
   save.taughtPancake = raw.taughtPancake === true;
+  save.taughtFishing = raw.taughtFishing === true;
+  save.taughtBalloon = raw.taughtBalloon === true;
+  save.cafeStyle = raw.cafeStyle === "pancake" ? "pancake" : "waffle";
   const r = raw.round;
   if (
     !r ||
-    !bounded(r.stage, 1, limit) ||
+    !bounded(r.stage, 1, STAGE_COUNT) ||
+    !isStageUnlocked(save, r.stage, { unlockAllLevels }) ||
     !bounded(r.index, 0, 7) ||
     !bounded(r.seed, 0, 0xffffffff) ||
     typeof r.id !== "string" ||
@@ -287,10 +347,19 @@ export function normalizeSave(raw, { unlockAllLevels = false } = {}) {
     r.level !== info.level ||
     r.kind !== info.kind ||
     !Array.isArray(r.tasks) ||
-    r.tasks.length !== (info.kind === "pancake" ? 5 : 8) ||
+    r.tasks.length !==
+      (info.kind === "pancake"
+        ? 5
+        : ["fishing", "balloon"].includes(info.kind)
+          ? 6
+          : 8) ||
     r.index >= r.tasks.length
   )
     return save;
+  if (["fishing", "balloon"].includes(info.kind)) {
+    if (validExploreRound(r)) save.round = r;
+    return save;
+  }
   if (info.kind === "pancake") {
     if (validPancakeRound(r)) save.round = r;
     return save;

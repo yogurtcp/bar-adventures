@@ -147,7 +147,23 @@ export function playSound(kind, options) {
       endingSources = rendered.sources;
       return { id: ending.id, label: ending.label };
     }
-    if (kind === "rocket-boost") {
+    if (kind === "fish-catch") {
+      [420, 690, 950].forEach((f, i) =>
+        tone(f, i * 0.13, 0.2, "sine", f * 0.65, 0.08),
+      );
+      whoosh(0.28, 0.025, 800, 1800);
+    } else if (kind === "fish-boot") {
+      tone(220, 0, 0.35, "triangle", 95, 0.09);
+      tone(350, 0.23, 0.22, "sine", 130, 0.06);
+    } else if (kind === "balloon-rise") {
+      whoosh(0.55, 0.035, 300, 1800);
+      [660, 880, 1100].forEach((f, i) =>
+        tone(f, i * 0.12, 0.3, "sine", f, 0.045),
+      );
+    } else if (kind === "balloon-puff") {
+      whoosh(0.25, 0.035, 600, 180);
+      tone(190, 0, 0.3, "triangle", 90, 0.07);
+    } else if (kind === "rocket-boost") {
       whoosh(0.65, 0.045, 180, 1900);
       tone(85, 0, 0.6, "triangle", 310, 0.12);
       [880, 1320, 1760].forEach((f, i) =>
