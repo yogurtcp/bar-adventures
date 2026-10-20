@@ -2,8 +2,12 @@ import { icon } from "./race-art.js";
 import { animalButton, ANIMALS, ANIMAL_ASSET } from "./animal-view.js";
 import { pancakeScore, PANCAKE_GOAL, correctPair } from "./pancake-model.js";
 export const CAFE_ASSET = ANIMAL_ASSET;
-export function pancakeStack(n, cls = "") {
-  return `<span class="pancake-stack ${cls}" style="--count:${n}" role="img" aria-label="${n} pancakes">${Array.from({ length: n }, (_, i) => `<i style="--p:${i}"></i>`).join("")}<span class="pancake-plate"></span></span>`;
+let cafeStyle = "waffle";
+export function setCafeStyle(style) {
+  cafeStyle = style;
+}
+export function pancakeStack(n, cls = "", style = cafeStyle) {
+  return `<span class="pancake-stack ${style === "waffle" ? "waffle-stack" : ""} ${cls}" style="--count:${n}" role="img" aria-label="${n} pancakes">${Array.from({ length: n }, (_, i) => `<i style="--p:${i}"></i>`).join("")}<span class="pancake-plate"></span></span>`;
 }
 const selectedPlates = (q) =>
   q.selected.map((id) => q.plates.find((p) => p.id === id));

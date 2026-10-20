@@ -1,0 +1,997 @@
+.explore-sprite {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background-image: var(--explore-image);
+  background-repeat: no-repeat;
+  background-size: 300% 100%;
+  background-position: 0 50%;
+  image-rendering: pixelated;
+  pointer-events: none;
+}
+.explore-sprite.mood-happy {
+  background-position: 50% 50%;
+}
+.explore-sprite.mood-surprised {
+  background-position: 100% 50%;
+}
+.fish-sprite {
+  display: inline-block;
+  flex: none;
+  width: 42px;
+  height: 42px;
+  background-image: var(--fish-image);
+  background-repeat: no-repeat;
+  background-size: 300% 200%;
+  background-position: var(--fish-x) var(--fish-y);
+  image-rendering: pixelated;
+  vertical-align: middle;
+}
+.fish-school {
+  display: grid;
+  grid-template-columns: repeat(3, 42px);
+  justify-content: center;
+  align-content: center;
+  gap: 2px 3px;
+}
+.fish-school > span {
+  display: block;
+  line-height: 0;
+}
+.explore-stage {
+  position: relative;
+  flex: 1;
+  min-height: 270px;
+  isolation: isolate;
+  overflow: hidden;
+  border: 2px solid #d1ded5;
+  border-radius: 24px;
+  background: #bce3e7;
+}
+.explore-sky {
+  position: absolute;
+  inset: 0;
+  z-index: -3;
+  background: linear-gradient(#a4d7df, #dbefda);
+}
+.explore-cloud {
+  position: absolute;
+  width: 105px;
+  height: 28px;
+  background: #fff9df;
+  box-shadow:
+    18px -15px #fff9df,
+    45px -8px #fff9df,
+    -14px 7px #fff9df;
+}
+.cloud-one {
+  left: 7%;
+  top: 24%;
+}
+.cloud-two {
+  right: 14%;
+  top: 19%;
+  transform: scale(0.7);
+}
+.cloud-three {
+  right: 31%;
+  top: 49%;
+  transform: scale(0.55);
+  opacity: 0.65;
+}
+.explore-sun {
+  position: absolute;
+  left: 21%;
+  top: 12%;
+  width: 42px;
+  height: 42px;
+  background: #ffe69e;
+  box-shadow:
+    8px 0 #ffe69e,
+    -8px 0 #ffe69e,
+    0 8px #ffe69e,
+    0 -8px #ffe69e;
+}
+.explore-mountains {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 27%;
+  height: 33%;
+  background: #99bea2;
+  clip-path: polygon(
+    0 90%,
+    0 65%,
+    8% 65%,
+    8% 40%,
+    15% 40%,
+    15% 20%,
+    23% 20%,
+    23% 48%,
+    29% 48%,
+    29% 61%,
+    37% 61%,
+    37% 40%,
+    45% 40%,
+    45% 15%,
+    53% 15%,
+    53% 47%,
+    60% 47%,
+    60% 68%,
+    70% 68%,
+    70% 28%,
+    78% 28%,
+    78% 48%,
+    85% 48%,
+    85% 5%,
+    91% 5%,
+    91% 43%,
+    100% 43%,
+    100% 100%,
+    0 100%
+  );
+}
+.explore-goal {
+  position: absolute;
+  left: 18px;
+  top: 16px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 11px 13px;
+  border-radius: 16px;
+  background: #fffaf0e8;
+  z-index: 12;
+  box-shadow: 0 3px #39574922;
+}
+.explore-goal > span {
+  color: #d9d9c5;
+}
+.explore-goal > span.earned {
+  color: #d2a646;
+}
+.pond-bank {
+  position: absolute;
+  bottom: 35%;
+  left: 0;
+  right: 0;
+  height: 8%;
+  background: #91b77a;
+  box-shadow: 0 10px #6b9f7d;
+  z-index: -1;
+}
+.pond-water {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 38%;
+  background: linear-gradient(#7bc5d0, #5caaba);
+  border-top: 7px solid #b5e5d5;
+  z-index: -1;
+}
+.pond-water i {
+  position: absolute;
+  left: 13%;
+  top: 24%;
+  width: 100px;
+  height: 4px;
+  background: #b5e4dc;
+  box-shadow:
+    100px 50px #b5e4dc,
+    -10px 80px #8ad4d7,
+    290px 80px #8ad4d7;
+}
+.pond-water i:nth-child(2) {
+  left: 55%;
+  top: 42%;
+  width: 65px;
+}
+.pond-water i:nth-child(3) {
+  left: 76%;
+  top: 76%;
+  width: 76px;
+}
+.pond-reeds {
+  position: absolute;
+  left: 3%;
+  bottom: 33%;
+  width: 70px;
+  height: 80px;
+  display: flex;
+  gap: 14px;
+  align-items: flex-end;
+  z-index: 1;
+}
+.pond-reeds i {
+  width: 5px;
+  height: 65px;
+  background: #557f50;
+  transform: rotate(-8deg);
+}
+.pond-reeds i:before {
+  content: "";
+  display: block;
+  width: 10px;
+  height: 24px;
+  background: #9c744a;
+  margin: -12px 0 0 -2px;
+  border-radius: 4px;
+}
+.pond-reeds i:nth-child(2) {
+  height: 45px;
+  transform: rotate(12deg);
+}
+.fishing-boat {
+  position: absolute;
+  left: 38%;
+  bottom: 24%;
+  height: 78%;
+  max-height: 365px;
+  aspect-ratio: 1;
+  transform: translateX(-50%);
+  z-index: 3;
+}
+.fishing-boat > .explore-sprite {
+  filter: drop-shadow(0 5px 0 #356d7a22);
+}
+.rod-line {
+  position: absolute;
+  left: 57%;
+  top: 18%;
+  height: 58%;
+  border-left: 2px solid #668f8d;
+  z-index: 1;
+  opacity: 0.6;
+}
+.rod-line:after {
+  content: "";
+  position: absolute;
+  width: 15px;
+  height: 15px;
+  bottom: -8px;
+  left: -8px;
+  border: 2px solid #e7f3d8;
+  border-top: 0;
+  border-radius: 0 0 10px 10px;
+}
+.pond-rock {
+  position: absolute;
+  right: 8%;
+  bottom: 33%;
+  width: 160px;
+  height: 42px;
+  background: #9ba79a;
+  border: 7px solid #b7c5ac;
+  border-bottom-color: #7e9688;
+  border-radius: 55% 65% 20% 20%;
+  z-index: 2;
+}
+.explore-stage .fishing-buddy {
+  position: absolute;
+  right: 9%;
+  bottom: 40%;
+  width: 140px;
+  height: 140px;
+  z-index: 3;
+}
+.catch-aquarium {
+  position: absolute;
+  left: 4%;
+  bottom: 4%;
+  width: 270px;
+  height: 61px;
+  padding: 5px 12px;
+  border: 4px solid #d9f0e6;
+  border-radius: 14px;
+  background: #b0e7e66b;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  z-index: 5;
+}
+.catch-aquarium .fish-sprite {
+  width: 36px;
+  height: 40px;
+}
+.reeled-catch {
+  position: absolute;
+  left: 58%;
+  top: 67%;
+  z-index: 8;
+  pointer-events: none;
+  animation: reel-catch 2.5s ease-in-out both;
+}
+.reeled-catch .fish-school {
+  grid-template-columns: repeat(3, 42px);
+}
+.reeled-catch .caught-shoe {
+  width: 75px;
+  height: 75px;
+  object-fit: contain;
+}
+.reeled-catch.wrong {
+  animation: reel-junk 2.7s ease-in-out both;
+}
+@keyframes reel-catch {
+  0% {
+    transform: translateY(40px) scale(0.6);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  50% {
+    transform: translate(-25px, -130px) rotate(-12deg);
+  }
+  80% {
+    opacity: 1;
+    transform: translate(-180px, -85px) scale(0.8);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-240px, 80px) scale(0.3);
+  }
+}
+@keyframes reel-junk {
+  0% {
+    opacity: 0;
+    transform: translateY(30px) rotate(20deg);
+  }
+  20%,
+  70% {
+    opacity: 1;
+    transform: translateY(-80px) rotate(-15deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(30px) rotate(20deg);
+  }
+}
+.pond-splash {
+  position: absolute;
+  left: 60%;
+  top: 74%;
+  z-index: 7;
+}
+.pond-splash i {
+  position: absolute;
+  width: 7px;
+  height: 13px;
+  border-radius: 50%;
+  background: #e5fff1;
+  animation: pond-splash 0.7s ease-out both;
+  transform: rotate(calc(var(--splash-i) * 48deg));
+}
+@keyframes pond-splash {
+  to {
+    opacity: 0;
+    translate: calc((var(--splash-i) - 3) * 18px)
+      calc(-55px + var(--splash-i) * 4px);
+  }
+}
+.balloon-stage {
+  background: #c7d9ef;
+  border-color: #d5d5e7;
+}
+.balloon-stage .explore-sky {
+  background: linear-gradient(#b7cce8, #e6d9e8 75%, #f8dec6);
+}
+.balloon-stage .explore-mountains {
+  bottom: -10%;
+  height: 28%;
+  background: #a4b3c9;
+  opacity: 0.7;
+}
+.balloon-rider {
+  position: absolute;
+  left: 43%;
+  height: 56%;
+  max-height: 380px;
+  aspect-ratio: 1;
+  transform: translateX(-50%);
+  transition: bottom 1.25s cubic-bezier(0.2, 0.7, 0.3, 1);
+  z-index: 4;
+  filter: drop-shadow(0 6px #a3a6bd33);
+}
+.cloud-castle {
+  position: absolute;
+  right: 6%;
+  top: 15%;
+  width: 150px;
+  height: 70px;
+  display: flex;
+  gap: 7px;
+  align-items: flex-end;
+  justify-content: center;
+  background: #eeecdf;
+  border-bottom: 12px solid #d2c7d0;
+  border-radius: 0 0 8px 8px;
+  box-shadow:
+    12px 10px #fff5e5,
+    -12px 10px #fff5e5,
+    0 19px #fff5e5;
+}
+.cloud-castle > i {
+  width: 26px;
+  height: 70px;
+  background: #e5d5db;
+  border: 5px solid #f9eddf;
+  border-bottom: 0;
+  position: relative;
+}
+.cloud-castle > i:before {
+  content: "";
+  position: absolute;
+  left: -5px;
+  right: -5px;
+  top: -26px;
+  height: 26px;
+  background: #bd90a8;
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+}
+.cloud-castle > i:nth-child(2) {
+  height: 95px;
+}
+.cloud-castle > span {
+  position: absolute;
+  right: 8px;
+  top: -55px;
+  color: #bc849c;
+}
+.balloon-waypoints {
+  position: absolute;
+  right: 24%;
+  top: 38%;
+  bottom: 12%;
+  display: flex;
+  flex-direction: column-reverse;
+  justify-content: space-around;
+  align-items: center;
+  border-right: 3px dashed #b4a6c9;
+  padding-right: 17px;
+}
+.balloon-waypoints > span {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border: 2px solid #c4b8d4;
+  border-radius: 50%;
+  color: #a595b9;
+  background: #fff8;
+}
+.balloon-waypoints .visited {
+  background: #fce4a5;
+  border-color: #ddb764;
+  color: #a67d29;
+}
+.buddy-cloud {
+  position: absolute;
+  right: 6%;
+  bottom: 8%;
+  width: 150px;
+  height: 25px;
+  border-radius: 25px;
+  background: #fff5df;
+  box-shadow:
+    14px -12px #fff5df,
+    -10px -5px #fff5df;
+}
+.explore-stage .balloon-buddy {
+  position: absolute;
+  right: 6%;
+  bottom: 11%;
+  width: 140px;
+  height: 140px;
+  z-index: 6;
+}
+.balloon-star-burst {
+  position: absolute;
+  left: 43%;
+  top: 40%;
+  z-index: 8;
+}
+.balloon-star-burst > i {
+  position: absolute;
+  color: #ffe69c;
+  animation: balloon-stars 1.4s ease-out both;
+  rotate: calc(var(--burst-i) * 45deg);
+}
+@keyframes balloon-stars {
+  to {
+    translate: calc((var(--burst-i) - 3) * 30px)
+      calc(-80px + var(--burst-i) * 12px);
+    opacity: 0;
+    scale: 0.5;
+  }
+}
+.balloon-puff {
+  position: absolute;
+  left: 48%;
+  bottom: 18%;
+  font-size: 70px;
+  color: #fff4df;
+  animation: animal-pop 2s ease-out both;
+  z-index: 8;
+}
+.explore-portrait {
+  position: absolute;
+  left: 5%;
+  top: 24%;
+  width: 175px;
+  height: 175px;
+  border: 5px solid #fffaf0;
+  border-radius: 50%;
+  background: #fff0cc;
+  box-shadow: 0 5px #5b74822b;
+  overflow: hidden;
+  z-index: 13;
+  pointer-events: none;
+  animation: chef-portrait-in 0.3s ease-out both;
+}
+.explore-portrait > .explore-sprite {
+  position: absolute;
+  width: 370px;
+  height: 370px;
+  left: -50px;
+  top: -12px;
+}
+.balloon-stage .explore-portrait > .explore-sprite {
+  left: -116px;
+  top: -128px;
+}
+.explore-dock {
+  flex: none;
+  min-height: 225px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  padding: 20px 22px;
+  border: 1px solid #dce2d4;
+  border-radius: 24px;
+  background: #fffdf5;
+  box-shadow: 0 4px #e2e4d6;
+}
+.fishing-request {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 8px 16px;
+  background: #e7f3ef;
+  border-radius: 19px;
+  flex: none;
+}
+.fishing-request > b {
+  font-size: 58px;
+  line-height: 1.2;
+  color: #458c91;
+}
+.fishing-request > .fish-sprite {
+  width: 62px;
+  height: 62px;
+}
+.fishing-request > span:last-child > .icon {
+  width: 25px;
+  height: 25px;
+  color: #8ba9a0;
+}
+.school-choices {
+  display: flex;
+  flex: 1;
+  gap: 12px;
+  max-width: 850px;
+  align-items: stretch;
+  justify-content: center;
+}
+.school-choice {
+  position: relative;
+  min-width: 0;
+  flex: 1;
+  min-height: 160px;
+  border: 3px solid #a8cdd0;
+  border-bottom-width: 6px;
+  border-radius: 22px;
+  background: #ddf1ee;
+  display: grid;
+  place-items: center;
+  padding: 10px;
+  max-width: 225px;
+}
+.school-choice .fish-school {
+  grid-template-columns: repeat(3, 42px);
+}
+.school-choice.school-miss {
+  border-color: #d8a18d;
+  background: #f3e4d7;
+}
+.school-answer {
+  border-color: #68a487;
+  background: #e1f3db;
+}
+.school-check {
+  position: absolute;
+  right: 7px;
+  top: 7px;
+  color: #4f916a;
+}
+.school-choice:disabled,
+.comparison-choice:disabled {
+  opacity: 1;
+}
+.comparison-dock {
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 22px 16px;
+  min-height: 255px;
+}
+.comparison-prompt {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+}
+.comparison-number {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 150px;
+}
+.comparison-number > b {
+  font-size: 40px;
+  line-height: 1;
+  color: #6e6d9c;
+}
+.balloon-quantity {
+  display: grid;
+  grid-template-columns: repeat(5, 25px);
+  gap: 2px;
+  min-height: 54px;
+  align-content: center;
+  justify-content: center;
+}
+.balloon-quantity > .food-item {
+  width: 25px;
+  height: 25px;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+.comparison-slot {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  font-size: 45px;
+  font-weight: 900;
+  border: 3px dashed #baa4c9;
+  border-radius: 18px;
+  background: #f1eaf4;
+  color: #8c77a4;
+}
+.comparison-slot.filled {
+  border-style: solid;
+  border-color: #78aa8a;
+  color: #568568;
+  background: #e3f2dc;
+}
+.comparison-choices {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+}
+.comparison-choice {
+  width: 105px;
+  height: 78px;
+  border: 3px solid #d6c8df;
+  border-bottom-width: 6px;
+  border-radius: 20px;
+  background: #f3edf6;
+  color: #88709f;
+  font-size: 50px;
+  line-height: 1;
+  font-weight: 900;
+}
+.comparison-choice.correct {
+  border-color: #6d9d7a;
+  color: #4f885d;
+  background: #e1efdc;
+}
+.comparison-choice.rejected {
+  border-color: #d5a69a;
+  color: #bf8c7d;
+  background: #f2e5df;
+}
+.explore-friends {
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  bottom: 1%;
+  display: flex;
+  gap: 22px;
+  justify-content: center;
+  z-index: 10;
+}
+.explore-friends .animal-button {
+  width: 100px;
+  height: 100px;
+}
+.explore-finale .catch-aquarium {
+  bottom: 23%;
+}
+.explore-result .explore-stage {
+  width: 100%;
+  min-height: 0;
+}
+.explore-demo-reward {
+  width: 170px;
+  height: 170px;
+  margin: 0 auto;
+}
+.example-school {
+  position: relative;
+  min-width: 150px;
+  min-height: 110px;
+  display: grid;
+  place-items: center;
+  border: 3px solid #c5deda;
+  border-radius: 19px;
+  background: #e5f3f0;
+}
+.example-school.chosen {
+  border-color: #66a483;
+  background: #def0d6;
+}
+.explore-example > .fishing-request {
+  width: max-content;
+  margin: auto;
+}
+.comparison-mouth {
+  font-size: 40px;
+  color: #8c77a4;
+}
+.explore-example .example-options {
+  margin: 18px 0;
+}
+.reduce-motion .balloon-rider {
+  transition: none;
+}
+.reduce-motion .reeled-catch,
+.reduce-motion .pond-splash i,
+.reduce-motion .balloon-star-burst i,
+.reduce-motion .explore-portrait,
+.reduce-motion .balloon-puff {
+  animation: none;
+}
+.reduce-motion .reeled-catch {
+  left: 48%;
+  top: 30%;
+}
+@media (orientation: portrait) {
+  .fishing-boat {
+    height: auto;
+    width: 65%;
+    max-width: 430px;
+    bottom: 28%;
+    left: 37%;
+  }
+  .explore-stage .fishing-buddy {
+    width: 130px;
+    height: 130px;
+    right: 5%;
+    bottom: 40%;
+  }
+  .pond-rock {
+    right: 3%;
+    width: 140px;
+  }
+  .rod-line {
+    left: 64%;
+    top: 41%;
+    height: 35%;
+  }
+  .explore-dock {
+    min-height: 260px;
+  }
+  .fishing-dock {
+    flex-direction: column;
+    gap: 14px;
+    padding: 14px;
+  }
+  .fishing-request > b {
+    font-size: 42px;
+  }
+  .fishing-request > .fish-sprite {
+    width: 47px;
+    height: 47px;
+  }
+  .fishing-request {
+    padding: 4px 16px;
+  }
+  .school-choices {
+    width: 100%;
+    flex: none;
+  }
+  .school-choice {
+    min-height: 145px;
+    padding: 6px;
+  }
+  .balloon-rider {
+    left: 42%;
+    height: 56%;
+  }
+  .cloud-castle {
+    right: 4%;
+    top: 12%;
+    transform: scale(0.8);
+    transform-origin: right top;
+  }
+  .balloon-waypoints {
+    right: 15%;
+    top: 32%;
+  }
+  .explore-stage .balloon-buddy {
+    right: 4%;
+    bottom: 10%;
+    width: 120px;
+    height: 120px;
+  }
+  .buddy-cloud {
+    right: 3%;
+    bottom: 8%;
+    width: 130px;
+  }
+  .comparison-dock {
+    min-height: 280px;
+    gap: 16px;
+  }
+  .explore-portrait {
+    width: 160px;
+    height: 160px;
+    left: 4%;
+    top: 21%;
+  }
+}
+@media (max-height: 700px) and (orientation: landscape) {
+  .explore-dock {
+    min-height: 200px;
+    padding: 12px 16px;
+    gap: 16px;
+  }
+  .school-choice {
+    min-height: 160px;
+  }
+  .fishing-request > b {
+    font-size: 43px;
+  }
+  .fishing-request > .fish-sprite {
+    width: 44px;
+    height: 44px;
+  }
+  .explore-stage .fishing-buddy {
+    width: 100px;
+    height: 100px;
+  }
+  .explore-goal {
+    padding: 8px 10px;
+    top: 12px;
+    left: 12px;
+  }
+  .comparison-dock {
+    min-height: 210px;
+    gap: 6px;
+  }
+  .comparison-number > b {
+    font-size: 31px;
+  }
+  .comparison-choice {
+    height: 65px;
+    width: 95px;
+    font-size: 41px;
+  }
+  .balloon-quantity {
+    min-height: 40px;
+    grid-template-columns: repeat(5, 19px);
+  }
+  .balloon-quantity > .food-item {
+    width: 19px;
+    height: 19px;
+  }
+  .comparison-slot {
+    height: 53px;
+    width: 53px;
+    font-size: 37px;
+  }
+  .explore-portrait {
+    width: 145px;
+    height: 145px;
+  }
+  .cloud-castle {
+    transform: scale(0.65);
+    transform-origin: right top;
+  }
+  .explore-stage .balloon-buddy {
+    width: 100px;
+    height: 100px;
+  }
+  .buddy-cloud {
+    width: 110px;
+  }
+  .balloon-waypoints > span {
+    width: 29px;
+    height: 29px;
+  }
+  .balloon-waypoints .icon {
+    width: 18px;
+    height: 18px;
+  }
+}
+@media (max-width: 1000px) and (orientation: landscape) {
+  .school-choice .fish-school {
+    grid-template-columns: repeat(3, 31px);
+  }
+  .school-choice .fish-sprite {
+    width: 31px;
+    height: 31px;
+  }
+  .school-choices {
+    gap: 8px;
+  }
+  .fishing-request {
+    gap: 5px;
+    padding: 7px;
+  }
+}
+@media (max-width: 600px) {
+  .school-choices {
+    gap: 7px;
+  }
+  .school-choice .fish-school {
+    grid-template-columns: repeat(2, 30px);
+    gap: 1px;
+  }
+  .school-choice .fish-sprite {
+    width: 30px;
+    height: 30px;
+  }
+  .school-choice {
+    padding: 5px;
+    min-height: 175px;
+  }
+  .comparison-prompt {
+    gap: 11px;
+  }
+  .comparison-number {
+    min-width: 105px;
+  }
+  .balloon-quantity {
+    grid-template-columns: repeat(5, 19px);
+  }
+  .balloon-quantity > .food-item {
+    width: 19px;
+    height: 19px;
+  }
+  .comparison-choice {
+    width: 85px;
+  }
+  .explore-goal {
+    gap: 5px;
+  }
+  .explore-stage .fishing-buddy {
+    width: 90px;
+    height: 90px;
+  }
+  .explore-portrait {
+    width: 140px;
+    height: 140px;
+  }
+  .catch-aquarium {
+    width: 250px;
+  }
+  .catch-aquarium .fish-sprite {
+    width: 33px;
+    height: 33px;
+  }
+}
