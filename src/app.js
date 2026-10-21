@@ -1,3 +1,11 @@
+import {
+  icecreamScene,
+  icecreamQuestion,
+  icecreamResult,
+  icecreamTutorial,
+  icecreamSprite,
+  ICECREAM_ASSET,
+} from "./icecream-view.js";
 import { trailsScreen } from "./trails-view.js";
 import {
   exploreScene,
@@ -74,6 +82,7 @@ let locked = false;
 let storageAvailable = true;
 let mapScroll = null;
 const trailScroll = {};
+const isIcecream = () => save.round?.kind === "icecream";
 const isExplore = () => ["fishing", "balloon"].includes(save.round?.kind);
 const taughtKey = () =>
   isExplore()
@@ -163,7 +172,7 @@ function topbar() {
   const level = stageInfo(
     view === "play" || view === "result" ? roundStage() : save.selected,
   ).level;
-  return `<header class="topbar"><div class="brand-symbol ${view !== "home" && isExplore() ? "explore-brand" : view !== "home" && isPancake() ? "cafe-brand" : view !== "home" && isRocket() ? "rocket-brand" : view !== "home" && isFood() ? "food-brand" : ""}" aria-label="Bar’s adventures">${view !== "home" && isExplore() ? exploreSprite(save.round.kind) : view !== "home" && isPancake() ? pancakeStack(3) : view !== "home" && isRocket() ? icon("rocket") : view !== "home" && isFood() ? icon("plate") : checkers()}</div><div class="top-middle">${view === "play" ? `<div class="question-flags" aria-label="Round questions">${save.round.tasks.map((q, i) => `<span class="question-flag ${q.resolved ? (q.firstTry ? "passed" : "missed") : i === save.round.index ? "active" : ""}" aria-label="Question ${i + 1}${q.resolved ? (q.firstTry ? ", correct first try" : ", completed with help") : ""}">${q.resolved ? icon(q.firstTry ? "check" : "flag") : `<i></i>`}</span>`).join("")}</div>` : `<span class="level-pill" aria-label="Level ${level}">${icon("flag")}<b>${level}</b></span>`}</div><nav class="top-actions" aria-label="Game controls">${view !== "home" ? button("home", "Back to stage map", "home") : ""}${view === "play" && phase !== "finish" ? button("help", "Show silent example", "hand") : ""}${view === "home" ? installButton() : ""}${button("sound", save.sound ? "Mute sounds" : "Enable sounds", save.sound ? "sound" : "mute")}${button("parent", "Parent settings", "settings")}</nav></header>`;
+  return `<header class="topbar"><div class="brand-symbol ${view !== "home" && isIcecream() ? "ice-brand" : view !== "home" && isExplore() ? "explore-brand" : view !== "home" && isPancake() ? "cafe-brand" : view !== "home" && isRocket() ? "rocket-brand" : view !== "home" && isFood() ? "food-brand" : ""}" aria-label="Bar’s adventures">${view !== "home" && isIcecream() ? icecreamSprite("happy") : view !== "home" && isExplore() ? exploreSprite(save.round.kind) : view !== "home" && isPancake() ? pancakeStack(3) : view !== "home" && isRocket() ? icon("rocket") : view !== "home" && isFood() ? icon("plate") : checkers()}</div><div class="top-middle">${view === "play" ? `<div class="question-flags" aria-label="Round questions">${save.round.tasks.map((q, i) => `<span class="question-flag ${q.resolved ? (q.firstTry ? "passed" : "missed") : i === save.round.index ? "active" : ""}" aria-label="Question ${i + 1}${q.resolved ? (q.firstTry ? ", correct first try" : ", completed with help") : ""}">${q.resolved ? icon(q.firstTry ? "check" : "flag") : `<i></i>`}</span>`).join("")}</div>` : `<span class="level-pill" aria-label="Level ${level}">${icon("flag")}<b>${level}</b></span>`}</div><nav class="top-actions" aria-label="Game controls">${view !== "home" ? button("home", "Back to stage map", "home") : ""}${view === "play" && phase !== "finish" ? button("help", "Show silent example", "hand") : ""}${view === "home" ? installButton() : ""}${button("sound", save.sound ? "Mute sounds" : "Enable sounds", save.sound ? "sound" : "mute")}${button("parent", "Parent settings", "settings")}</nav></header>`;
 }
 function racerSprite(driver) {
   if (driver.id !== "bar" || view !== "play") return driver.sprite;
@@ -212,6 +221,7 @@ function track(distance, finishing = false) {
   return `<section class="race-stage ${feedback ? "reaction-" + feedback : ""} ${phase === "countdown" ? "starting" : ""} ${finishing ? "finishing" : ""}" aria-label="Live race track">${scenery(roundStage())}<div class="track-side"><span class="track-flower"></span><span class="track-flower second"></span></div><div class="road"><div class="curb upper"></div><div class="start-line" aria-hidden="true"></div><div class="finish-line" aria-label="Finish line">${checkers()}<span class="finish-pole"></span></div>${racers(distance, finishing)}<div class="curb lower"></div></div><div class="grass-bottom"></div>${phase === "countdown" ? `<div class="start-lights" aria-label="Race starts in ${countdown}">${[3, 2, 1].map((n) => `<i class="${countdown >= n ? "lit" : ""}"></i>`).join("")}</div>` : ""}${phase === "finish" ? `<div class="finish-flags" aria-hidden="true">${checkers()}${checkers()}</div>` : ""}</section>`;
 }
 function activityPicture(kind) {
+  if (kind === "icecream") return icecreamSprite("happy");
   if (["fishing", "balloon"].includes(kind)) return exploreSprite(kind);
   if (kind === "pancake") return pancakeStack(3);
   return kind === "race"
@@ -235,6 +245,7 @@ function quantity(q, help = false) {
   return `<div class="quantity-cue ${help ? "joining" : ""}" aria-hidden="true">${dots(q.a, "red")}<span>${isFood() ? "−" : "+"}</span>${dots(q.b, "blue")}${help ? `<span>=</span><span class="joined-dots">${isFood() ? dots(q.answer, "red") : dots(q.a, "red") + dots(q.b, "blue")}</span>` : ""}</div>`;
 }
 function questionPanel() {
+  if (isIcecream()) return icecreamQuestion(save.round, feedback, locked);
   if (isExplore()) return exploreQuestion(save.round, feedback, locked);
   if (isPancake()) return pancakeQuestion(save.round, feedback, locked);
   if (isRocket())
@@ -249,6 +260,7 @@ function resultButtons(won) {
 }
 function resultScreen() {
   const won = wonRound(save.round);
+  if (isIcecream()) return icecreamResult(save.round, resultButtons(won));
   if (isExplore()) return exploreResult(save.round, resultButtons(won));
   if (isPancake()) return pancakeResult(save.round, resultButtons(won));
   if (isFood()) return foodResult(save.round, resultButtons(won));
@@ -257,6 +269,7 @@ function resultScreen() {
   return `<section class="result-screen ${won ? "won" : "try-again"}"><div class="result-art"><img src="${ASSET}${won ? "victory" : "finish-" + winner.id}.png" alt="${won ? "Bar crosses first in his red car while his animal friends cheer" : winner.name + " wins this race and Bar gives a friendly wave from his red car"}"/></div><div class="result-dock"><div class="result-medal">${icon(won ? "trophy" : "flag")}</div><div class="result-score" aria-label="${score(save.round)} out of 8 correct on the first try">${save.round.tasks.map((q) => `<i class="${q.firstTry ? "passed" : "missed"}">${icon(q.firstTry ? "check" : "flag")}</i>`).join("")}</div><div class="result-actions">${resultButtons(won)}</div></div></section>`;
 }
 function tutorial() {
+  if (isIcecream()) return icecreamTutorial(demoStep);
   if (isExplore()) return exploreTutorial(save.round.kind, demoStep);
   if (isPancake()) return pancakeTutorial(demoStep);
   if (isRocket()) return rocketTutorial(demoStep);
@@ -279,7 +292,7 @@ function render(options = {}) {
     trailScroll[el.dataset.trailScroll] = el.scrollLeft;
   });
   disposeAnimalTaps();
-  root.innerHTML = `<main class="app-shell screen-${view}">${topbar()}${view === "home" ? homeScreen() : view === "levels" ? routeScreen() : view === "result" ? resultScreen() : `<div class="race-screen">${isExplore() ? exploreScene(save.round, feedback, options.exploreFrom) : isPancake() ? pancakeScene(save.round, feedback) : isRocket() ? rocketScene(save.round, feedback, options.rocketFrom, finishing) : isFood() ? foodScene(save.round, feedback) : track(from, finishing)}${questionPanel()}</div>`}${demo ? tutorial() : ""}</main>`;
+  root.innerHTML = `<main class="app-shell screen-${view} ${view !== "home" && isIcecream() ? "icecream-shell" : ""}">${topbar()}${view === "home" ? homeScreen() : view === "levels" ? routeScreen() : view === "result" ? resultScreen() : `<div class="race-screen">${isIcecream() ? icecreamScene(save.round, feedback) : isExplore() ? exploreScene(save.round, feedback, options.exploreFrom) : isPancake() ? pancakeScene(save.round, feedback) : isRocket() ? rocketScene(save.round, feedback, options.rocketFrom, finishing) : isFood() ? foodScene(save.round, feedback) : track(from, finishing)}${questionPanel()}</div>`}${demo ? tutorial() : ""}</main>`;
   bind();
   disposeAnimalTaps = bindAnimalTaps(root, sound);
   questionEntry = false;
@@ -371,6 +384,11 @@ function render(options = {}) {
   }
 }
 function bind() {
+  root
+    .querySelectorAll("[data-icecream]")
+    .forEach((b) =>
+      b.addEventListener("click", () => answer(b.dataset.icecream)),
+    );
   root.querySelectorAll("[data-cafe-style]").forEach((b) =>
     b.addEventListener("click", () => {
       save.cafeStyle = b.dataset.cafeStyle;
@@ -414,13 +432,20 @@ function bind() {
     clearTimers();
     demo = false;
     if (view === "play" && phase === "intro") {
-      if (isExplore()) save[taughtKey()] = true;
+      if (isIcecream()) save.taughtIcecream = true;
+      else if (isExplore()) save[taughtKey()] = true;
       else if (isPancake()) save.taughtPancake = true;
       else if (isRocket()) save.taughtRocket = true;
       else if (isFood()) save.taughtFood = true;
       else save.taught = true;
       persist();
-      if (isFood() || isRocket() || isPancake() || isExplore()) {
+      if (
+        isFood() ||
+        isRocket() ||
+        isPancake() ||
+        isExplore() ||
+        isIcecream()
+      ) {
         phase = "question";
         locked = false;
         render();
@@ -476,6 +501,10 @@ function prepareRace(level, replay = false) {
   )
     save.round = newRound(level);
   persist();
+  if (isIcecream()) {
+    const image = new Image();
+    image.src = ICECREAM_ASSET;
+  }
   if (isExplore()) {
     for (const name of [save.round.kind, "fish"]) {
       const image = new Image();
@@ -496,15 +525,17 @@ function prepareRace(level, replay = false) {
     }
   }
   if (
-    isExplore()
-      ? !save[taughtKey()]
-      : isPancake()
-        ? !save.taughtPancake
-        : isRocket()
-          ? !save.taughtRocket
-          : isFood()
-            ? !save.taughtFood
-            : !save.taught
+    isIcecream()
+      ? !save.taughtIcecream
+      : isExplore()
+        ? !save[taughtKey()]
+        : isPancake()
+          ? !save.taughtPancake
+          : isRocket()
+            ? !save.taughtRocket
+            : isFood()
+              ? !save.taughtFood
+              : !save.taught
   ) {
     phase = "intro";
     render();
@@ -517,7 +548,13 @@ function prepareRace(level, replay = false) {
       questionEntry = true;
       render();
     }
-  } else if (isFood() || isRocket() || isPancake() || isExplore()) {
+  } else if (
+    isFood() ||
+    isRocket() ||
+    isPancake() ||
+    isExplore() ||
+    isIcecream()
+  ) {
     phase = "question";
     locked = false;
     questionEntry = true;
@@ -585,16 +622,16 @@ function answer(value) {
   if (view !== "play" || phase !== "question" || locked || demo) return;
   const before = isExplore()
     ? exploreScore(save.round)
-    : isPancake()
+    : isPancake() || isIcecream()
       ? null
       : isRocket()
         ? rocketPoint(save.round)
         : positions(save.round);
   const result = submit(save.round, value);
   if (!result.accepted) return;
-  if (isPancake() && !result.graded) {
+  if ((isPancake() || isIcecream()) && !result.graded) {
     persist();
-    sound("tap");
+    sound(isIcecream() && value !== "undo" ? "ice-scoop" : "tap");
     render();
     return;
   }
@@ -613,11 +650,12 @@ function answer(value) {
           ? "balloon-rise"
           : "balloon-puff",
     );
+  if (isIcecream()) sound(result.correct ? "ice-serve" : "ice-oops");
   if (isRocket()) sound(result.correct ? "rocket-boost" : "rocket-sputter");
   render(
     isExplore()
       ? { exploreFrom: before }
-      : isPancake()
+      : isPancake() || isIcecream()
         ? {}
         : isRocket()
           ? { rocketFrom: before }
@@ -625,7 +663,7 @@ function answer(value) {
   );
   const roundId = save.round.id;
   const taskId = currentTask().id;
-  if (isPancake()) {
+  if (isPancake() || isIcecream()) {
     later(() => {
       if (
         view === "play" &&
@@ -665,7 +703,7 @@ function answer(value) {
       ? save.round.kind === "fishing"
         ? 2800
         : 2500
-      : isPancake()
+      : isPancake() || isIcecream()
         ? result.correct
           ? 2600
           : 3100
@@ -707,7 +745,7 @@ function finishRace() {
     );
     return;
   }
-  if (isFood() || isPancake() || isExplore()) {
+  if (isFood() || isPancake() || isExplore() || isIcecream()) {
     view = "result";
     phase = "idle";
     feedback = "";
@@ -793,7 +831,7 @@ function adultSettings() {
       panel.querySelector("input").focus();
       return;
     }
-    panel.innerHTML = `<div class="adult-dialog"><div class="adult-heading"><h2>Parent settings</h2><button type="button" data-close aria-label="Close parent settings">${icon("close")}</button></div><p>Every game has its own path. The first level of every game is open; wins unlock only the next level of that same game. Choose pancakes or waffles with the café pictures. Fishing starts with counting groups of 1–3 fish. Balloons start with greater/less comparisons up to 3, with equality introduced at level 3. Both new games need four rewards from six questions. Races and meals have eight questions each. Races need six first-try answers; meals need seven food points out of ten. Two sweets are double bonuses. Food questions have one attempt, then show the answer and move on. Rocket missions need six power cells before three mistakes, ending as soon as either is reached. The café is available from the beginning. Choose two pancake plates to match the order; tap your first plate again to undo. Any matching pair works. Four correct orders out of five wins. Tap animal friends for a playful reaction; this never affects answers or progress. Thinking time is unlimited.</p><label>Sound volume<input type="range" min="0" max=".7" step=".05" value="${save.volume}"/></label><div class="adult-sound-previews"><button type="button" data-preview-win>Preview correct-answer sound</button><button type="button" data-preview-lose>Preview wrong-answer sound</button></div><label class="check-label"><input type="checkbox" data-motion ${save.reducedMotion ? "checked" : ""}/> Reduce motion</label><button type="button" data-demo>Show silent example next time</button><button type="button" data-reset>Reset adventure progress</button><p class="storage-status">${storageAvailable ? "Progress saves in this browser." : "This browser is not allowing progress to be saved."}</p></div>`;
+    panel.innerHTML = `<div class="adult-dialog"><div class="adult-heading"><h2>Parent settings</h2><button type="button" data-close aria-label="Close parent settings">${icon("close")}</button></div><p>Every game has its own path. The first level of every game is open; wins unlock only the next level of that same game. Choose pancakes or waffles with the café pictures. The ice cream shop starts with one scoop, then two. Copy the pictured cone from the bottom upwards; use the curved arrow to undo a scoop before the cone is complete. Cones serve automatically; four matching orders out of five wins. Later levels add flavors and up to four scoops. Fishing starts with counting groups of 1–3 fish. Balloons start with greater/less comparisons up to 3, with equality introduced at level 3. Both new games need four rewards from six questions. Races and meals have eight questions each. Races need six first-try answers; meals need seven food points out of ten. Two sweets are double bonuses. Food questions have one attempt, then show the answer and move on. Rocket missions need six power cells before three mistakes, ending as soon as either is reached. The café is available from the beginning. Choose two pancake plates to match the order; tap your first plate again to undo. Any matching pair works. Four correct orders out of five wins. Tap animal friends for a playful reaction; this never affects answers or progress. Thinking time is unlimited.</p><label>Sound volume<input type="range" min="0" max=".7" step=".05" value="${save.volume}"/></label><div class="adult-sound-previews"><button type="button" data-preview-win>Preview correct-answer sound</button><button type="button" data-preview-lose>Preview wrong-answer sound</button></div><label class="check-label"><input type="checkbox" data-motion ${save.reducedMotion ? "checked" : ""}/> Reduce motion</label><button type="button" data-demo>Show silent example next time</button><button type="button" data-reset>Reset adventure progress</button><p class="storage-status">${storageAvailable ? "Progress saves in this browser." : "This browser is not allowing progress to be saved."}</p></div>`;
     panel.querySelector("[data-close]").onclick = close;
     panel.querySelector("input[type=range]").oninput = (e) => {
       save.volume = +e.target.value;
@@ -820,6 +858,7 @@ function adultSettings() {
       save.taughtPancake = false;
       save.taughtFishing = false;
       save.taughtBalloon = false;
+      save.taughtIcecream = false;
       persist();
       panel.querySelector("[data-demo]").textContent =
         "Example will play before the next activity";

@@ -95,6 +95,19 @@ export function playSound(kind, options) {
       source.start(now);
       source.stop(now + length + 0.02);
     };
+    if (kind === "ice-scoop") {
+      tone(420, 0, 0.14, "sine", 820, 0.2);
+      tone(1047, 0.08, 0.17, "triangle", 1200, 0.08);
+    }
+    if (kind === "ice-serve") {
+      [784, 988, 1175, 1568].forEach((f, i) =>
+        tone(f, i * 0.09, 0.3, "sine", f, 0.11),
+      );
+    }
+    if (kind === "ice-oops") {
+      tone(600, 0, 0.3, "triangle", 170, 0.14);
+      tone(180, 0.28, 0.3, "sine", 300, 0.13);
+    }
     if (kind.startsWith("animal:")) {
       if (animalBus) {
         const old = animalBus;

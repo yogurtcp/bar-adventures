@@ -13,6 +13,8 @@ function finish(s, kind, level = 1) {
     const q = s.round.tasks[i];
     if (kind === "pancake")
       for (const p of correctPair(q)) j.submit(s.round, p.id);
+    else if (kind === "icecream")
+      for (const flavor of q.recipe) j.submit(s.round, flavor);
     else j.submit(s.round, q.answer);
   }
   j.completeRound(s);

@@ -4,7 +4,7 @@ import * as journey from "../src/journey-model.js";
 import * as rocket from "../src/rocket-model.js";
 
 test("legacy stage IDs remain stable when independent paths and new games are added", () => {
-  assert.equal(journey.STAGE_COUNT, 64);
+  assert.equal(journey.STAGE_COUNT, 74);
   assert.deepEqual(
     journey.STAGES.slice(0, 6).map((s) => s.kind),
     ["race", "food", "race", "food", "race", "food"],

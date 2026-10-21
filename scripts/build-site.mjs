@@ -66,6 +66,7 @@ const shell = [
   "./assets/race-v2/bar.png",
   "./assets/rocket-v1/ship.png",
   "./assets/objects/egg.webp",
+  "./assets/icecream-v1/bar.png",
   ...["fishing", "balloon", "fish"].map(
     (name) => `./assets/explore-v1/${name}.png`,
   ),

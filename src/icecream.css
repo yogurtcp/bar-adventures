@@ -1,0 +1,925 @@
+.ice-bar {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--ice-image) 0 50% / 300% 100% no-repeat;
+  image-rendering: pixelated;
+  pointer-events: none;
+}
+.ice-bar.mood-happy {
+  background-position: 50% 50%;
+}
+.ice-bar.mood-surprised {
+  background-position: 100% 50%;
+}
+.ice-scoop {
+  --flavor: #f1a6b4;
+  --edge: #d57e95;
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--flavor);
+  border: 3px solid var(--edge);
+  border-radius: 46% 47% 30% 33%;
+  box-shadow:
+    inset 5px 5px #fff5,
+    inset -5px -6px #a34d5422;
+  clip-path: polygon(
+    0 35%,
+    8% 35%,
+    8% 16%,
+    23% 16%,
+    23% 6%,
+    72% 6%,
+    72% 15%,
+    90% 15%,
+    90% 32%,
+    100% 32%,
+    100% 86%,
+    86% 86%,
+    86% 100%,
+    66% 100%,
+    66% 93%,
+    32% 93%,
+    32% 100%,
+    12% 100%,
+    12% 88%,
+    0 88%
+  );
+}
+.ice-scoop i {
+  position: absolute;
+  width: 4px;
+  height: 6px;
+  background: #fff8df;
+  rotate: -20deg;
+  left: 25%;
+  top: 35%;
+}
+.ice-scoop i:nth-child(2) {
+  left: 64%;
+  top: 28%;
+  rotate: 30deg;
+}
+.ice-scoop i:nth-child(3) {
+  left: 48%;
+  top: 64%;
+}
+.ice-scoop i:nth-child(4) {
+  left: 14%;
+  top: 70%;
+}
+.ice-scoop i:nth-child(5) {
+  left: 78%;
+  top: 65%;
+}
+.flavor-vanilla {
+  --flavor: #fff1bc;
+  --edge: #d8ba7e;
+}
+.flavor-vanilla i {
+  width: 3px;
+  height: 3px;
+  background: #a98b63;
+}
+.flavor-chocolate {
+  --flavor: #af7958;
+  --edge: #815339;
+}
+.flavor-chocolate i {
+  width: 9px;
+  height: 7px;
+  background: #634335;
+  rotate: 20deg;
+  border: 1px solid #c49469;
+}
+.flavor-mint {
+  --flavor: #a2d9b6;
+  --edge: #69a883;
+}
+.flavor-mint i {
+  width: 9px;
+  height: 5px;
+  background: #438b68;
+  rotate: -30deg;
+  border-radius: 0 80%;
+}
+.ice-cone {
+  display: inline-block;
+  position: relative;
+  flex: none;
+  width: 72px;
+  height: calc(78px + var(--scoops) * 34px);
+  vertical-align: bottom;
+}
+.ice-wafer {
+  position: absolute;
+  bottom: 0;
+  left: 6%;
+  width: 88%;
+  height: 86px;
+  background:
+    repeating-linear-gradient(
+      38deg,
+      transparent 0 10px,
+      #ae783c66 11px 13px,
+      transparent 14px 23px
+    ),
+    repeating-linear-gradient(
+      -38deg,
+      #e6b66c 0 10px,
+      #b9854966 11px 13px,
+      #e6b66c 14px 23px
+    );
+  clip-path: polygon(0 0, 100% 0, 56% 100%, 44% 100%);
+  border-top: 6px solid #c99150;
+}
+.ice-layer {
+  position: absolute;
+  left: 0;
+  bottom: calc(72px + var(--layer) * 34px);
+  width: 100%;
+  height: 49px;
+  z-index: calc(2 + var(--layer));
+}
+.ice-step {
+  position: absolute;
+  top: 14px;
+  left: -29px;
+  background: #fffdf3;
+  border: 2px solid #c6b29b;
+  border-radius: 50%;
+  width: 23px;
+  height: 23px;
+  font-size: 13px;
+  display: grid;
+  place-items: center;
+  line-height: 1;
+  color: #8d745e;
+}
+.ice-outline {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 3px dashed #c4ad94;
+  border-radius: 45% 45% 30% 30%;
+  background: #fffaf288;
+}
+.ice-stage {
+  position: relative;
+  flex: 1;
+  min-height: 300px;
+  isolation: isolate;
+  overflow: hidden;
+  border: 2px solid #e6cfc8;
+  border-radius: 24px;
+  background: linear-gradient(#f8e2cf 0 75%, #edcab6 75%);
+}
+.ice-awning {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 48px;
+  background: repeating-linear-gradient(
+    90deg,
+    #eaa2ad 0 48px,
+    #fff5df 48px 96px
+  );
+  border-bottom: 8px solid #da95a0;
+  border-radius: 0 0 17px 17px;
+  z-index: 1;
+}
+.ice-window {
+  position: absolute;
+  left: 7%;
+  top: 13%;
+  width: 32%;
+  height: 59%;
+  border: 12px solid #fff6e6;
+  background: linear-gradient(#b5dce2, #e8f0d8);
+  box-shadow: 0 5px #d9b8a0;
+  border-radius: 60px 60px 6px 6px;
+  overflow: hidden;
+}
+.ice-window:before {
+  content: "";
+  position: absolute;
+  width: 45%;
+  height: 15px;
+  background: #fff9e8;
+  left: 17%;
+  top: 24%;
+  box-shadow:
+    28px -10px #fff9e8,
+    70px 45px #fff9e8;
+}
+.ice-window:after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  height: 12%;
+  left: 0;
+  right: 0;
+  background: #91b18c;
+  box-shadow: 0 -12px #b5cba0;
+}
+.ice-counter {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 22%;
+  background: repeating-linear-gradient(
+    90deg,
+    #a0c5b0 0 95px,
+    #94bda7 95px 99px
+  );
+  border-top: 17px solid #fff7e9;
+  box-shadow: 0 -5px #c8ac94;
+  z-index: 4;
+}
+.ice-counter > span {
+  position: absolute;
+  left: 11%;
+  bottom: 12%;
+  width: 150px;
+  height: 40%;
+  border: 4px solid #e5f0d7;
+  border-radius: 12px;
+  background: #bad9bd;
+}
+.ice-shopkeeper {
+  position: absolute;
+  left: 3%;
+  bottom: 4%;
+  width: 40%;
+  height: 91%;
+  z-index: 3;
+}
+.ice-stage .ice-customer {
+  position: absolute;
+  right: 3%;
+  bottom: 20%;
+  width: 24%;
+  max-width: 200px;
+  aspect-ratio: 1;
+  height: auto;
+  z-index: 3;
+}
+.ice-order {
+  position: absolute;
+  right: 6%;
+  bottom: 63%;
+  padding: 12px 27px 10px 46px;
+  background: #fffaf0;
+  border: 3px solid #d9b8a2;
+  border-radius: 24px;
+  z-index: 5;
+}
+.ice-order:after {
+  content: "";
+  position: absolute;
+  bottom: -16px;
+  right: 26px;
+  width: 20px;
+  height: 20px;
+  background: #fffaf0;
+  border-right: 3px solid #d9b8a2;
+  border-bottom: 3px solid #d9b8a2;
+  rotate: 45deg;
+}
+.ice-order .ice-cone {
+  width: 53px;
+  height: calc(51px + var(--scoops) * 23px);
+}
+.ice-order .ice-wafer {
+  height: 55px;
+}
+.ice-order .ice-layer {
+  bottom: calc(46px + var(--layer) * 23px);
+  height: 34px;
+}
+.ice-order .ice-step {
+  width: 18px;
+  height: 18px;
+  top: 8px;
+  left: -24px;
+  font-size: 11px;
+}
+.ice-order-verdict {
+  position: absolute;
+  right: -12px;
+  top: -10px;
+  border-radius: 50%;
+  background: #e4efd2;
+  padding: 7px;
+  color: #57826b;
+}
+.ice-workspace {
+  position: absolute;
+  left: 53%;
+  bottom: calc(22% + 12px);
+  transform: translateX(-50%);
+  z-index: 6;
+}
+.ice-workspace .ice-cone,
+.ice-delivery > .ice-cone {
+  width: 88px;
+  height: calc(90px + var(--scoops) * 40px);
+}
+.ice-workspace .ice-wafer,
+.ice-delivery .ice-wafer {
+  height: 96px;
+}
+.ice-workspace .ice-layer,
+.ice-delivery .ice-layer {
+  height: 57px;
+  bottom: calc(83px + var(--layer) * 40px);
+}
+.ice-cone-stand {
+  position: absolute;
+  bottom: -15px;
+  left: 12%;
+  width: 76%;
+  height: 26px;
+  border: 5px solid #a17b64;
+  border-radius: 7px;
+  background: #dec5aa;
+  z-index: -1;
+}
+.ice-workspace .latest {
+  animation: ice-scoop-in 0.25s ease-out both;
+}
+.ice-correct .ice-workspace {
+  opacity: 0;
+}
+.ice-delivery {
+  position: absolute;
+  left: 53%;
+  bottom: 25%;
+  z-index: 8;
+  animation: ice-deliver 1.9s ease-in-out both;
+}
+.ice-wrong .ice-workspace {
+  animation: ice-wobble 0.55s ease-in-out;
+}
+.ice-goal {
+  position: absolute;
+  left: 14px;
+  top: 62px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 12px;
+  background: #fffaf0ed;
+  border-radius: 15px;
+  z-index: 8;
+  color: #b3b3a0;
+}
+.ice-goal > .icon {
+  color: #ba944c;
+}
+.ice-goal .earned {
+  color: #cc9e39;
+}
+.ice-portrait {
+  position: absolute;
+  left: 5%;
+  top: 26%;
+  width: 175px;
+  height: 175px;
+  border: 5px solid #fff9e8;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #ffdfd4;
+  z-index: 12;
+  box-shadow: 0 5px #aa867433;
+  animation: chef-portrait-in 0.3s ease-out both;
+  pointer-events: none;
+}
+.ice-portrait .ice-bar {
+  position: absolute;
+  width: 400px;
+  height: 400px;
+  left: -130px;
+  top: -20px;
+}
+.ice-sparkles {
+  position: absolute;
+  right: 17%;
+  top: 43%;
+  font-size: 44px;
+  color: #fff6be;
+  z-index: 10;
+  animation: ice-sparkle 1.6s ease-out both;
+}
+.ice-sparkles i {
+  position: absolute;
+  left: -65px;
+  top: 30px;
+}
+.ice-sparkles b {
+  position: absolute;
+  left: 40px;
+  top: -40px;
+}
+.ice-dock {
+  position: relative;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 25px;
+  min-height: 202px;
+  padding: 18px 24px;
+  background: #fffaf2;
+  border: 2px solid #e5d8c7;
+  border-radius: 24px;
+  box-shadow: 0 4px #e4dfcd;
+}
+.ice-build-guide {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  padding: 8px 18px;
+  border-radius: 18px;
+  background: #f3eadc;
+}
+.ice-build-guide .ice-cone {
+  width: 42px;
+  height: calc(45px + var(--scoops) * 20px);
+}
+.ice-build-guide .ice-wafer {
+  height: 50px;
+}
+.ice-build-guide .ice-layer {
+  height: 29px;
+  bottom: calc(41px + var(--layer) * 20px);
+}
+.ice-build-guide .ice-scoop {
+  border-width: 2px;
+}
+.ice-build-guide > .icon {
+  color: #b59e88;
+  width: 22px;
+}
+.ice-flavors {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+  gap: 16px;
+  max-width: 640px;
+}
+.ice-flavor {
+  flex: 1;
+  max-width: 144px;
+  min-width: 80px;
+  height: 138px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid #dcc5b0;
+  border-bottom-width: 7px;
+  border-radius: 23px;
+  background: #f6ecdd;
+  padding: 10px;
+}
+.ice-flavor > .ice-scoop {
+  position: absolute;
+  width: 70px;
+  height: 58px;
+  top: 15px;
+  z-index: 2;
+}
+.ice-tub {
+  position: absolute;
+  top: 66px;
+  width: 80%;
+  max-width: 95px;
+  height: 43px;
+  background: #c8ded4;
+  border: 4px solid #98bbaa;
+  border-top: 7px solid #fdf9e9;
+  border-radius: 2px 2px 18px 18px;
+  box-shadow: 0 4px #b5af9622;
+}
+.ice-flavor:active:not(:disabled) {
+  transform: translateY(3px);
+}
+.ice-flavor:disabled {
+  opacity: 1;
+}
+.ice-undo {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  border: 2px solid #d8c7b4;
+  background: #eee5d8;
+  border-radius: 17px;
+  color: #a58c74;
+}
+.ice-undo:disabled {
+  opacity: 0.35;
+}
+.ice-correction {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 35px;
+  border-radius: 22px;
+  background: #fffaf2f5;
+  z-index: 8;
+  animation: ice-correct-reveal 3.1s both;
+  pointer-events: none;
+}
+.ice-correction > .icon {
+  color: #649976;
+  width: 40px;
+  height: 40px;
+}
+.ice-correction .ice-cone {
+  width: 56px;
+  height: calc(55px + var(--scoops) * 24px);
+}
+.ice-correction .ice-wafer {
+  height: 60px;
+}
+.ice-correction .ice-layer {
+  bottom: calc(49px + var(--layer) * 24px);
+  height: 35px;
+}
+.ice-party {
+  position: absolute;
+  bottom: 21%;
+  right: 2%;
+  display: flex;
+  gap: 12px;
+  width: 63%;
+  z-index: 5;
+}
+.ice-party > div {
+  position: relative;
+  flex: 1;
+}
+.ice-party .animal-button {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+}
+.ice-party .ice-cone {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  transform: scale(0.65);
+  transform-origin: bottom right;
+}
+.ice-result .ice-stage {
+  width: 100%;
+  min-height: 0;
+}
+.ice-result .ice-shopkeeper {
+  left: 0;
+  width: 40%;
+}
+.ice-example-cones {
+  display: flex;
+  justify-content: center;
+  gap: 55px;
+  align-items: center;
+  margin-bottom: 22px;
+}
+.ice-example-cones > .icon {
+  color: #baa08b;
+}
+.ice-example-flavors {
+  display: flex;
+  justify-content: center;
+  gap: 35px;
+}
+.ice-example-flavors > span {
+  position: relative;
+  width: 70px;
+  height: 54px;
+}
+.ice-demo-bar {
+  width: 145px;
+  height: 145px;
+  margin: 15px auto 0;
+}
+.trail-picture > .ice-bar {
+  width: 70px;
+  height: 70px;
+}
+.start-activity-picture > .ice-bar {
+  width: 100%;
+  height: 100%;
+}
+@keyframes ice-scoop-in {
+  from {
+    translate: 0 -24px;
+    scale: 0.8;
+    opacity: 0.3;
+  }
+  to {
+    translate: 0;
+    scale: 1;
+    opacity: 1;
+  }
+}
+@keyframes ice-deliver {
+  0% {
+    transform: translate(-50%, 0) rotate(-8deg);
+    opacity: 1;
+  }
+  55%,
+  80% {
+    left: 86%;
+    transform: translate(-50%, 0) rotate(8deg);
+    opacity: 1;
+  }
+  100% {
+    left: 86%;
+    transform: translate(-50%, 20px) scale(0.6);
+    opacity: 0;
+  }
+}
+@keyframes ice-wobble {
+  25%,
+  75% {
+    rotate: -7deg;
+  }
+  50% {
+    rotate: 7deg;
+  }
+}
+@keyframes ice-sparkle {
+  0% {
+    opacity: 0;
+    scale: 0.4;
+  }
+  35%,
+  70% {
+    opacity: 1;
+    scale: 1;
+  }
+  100% {
+    opacity: 0;
+    scale: 1.4;
+  }
+}
+@keyframes ice-correct-reveal {
+  0%,
+  30% {
+    opacity: 0;
+  }
+  43%,
+  100% {
+    opacity: 1;
+  }
+}
+.reduce-motion .ice-workspace,
+.reduce-motion .ice-layer,
+.reduce-motion .ice-portrait,
+.reduce-motion .ice-sparkles,
+.reduce-motion .ice-correction {
+  animation: none;
+}
+.reduce-motion .ice-delivery {
+  animation: none;
+  left: 78%;
+  opacity: 1;
+  transform: translateX(-50%);
+}
+@media (orientation: portrait) {
+  .ice-stage {
+    min-height: 400px;
+  }
+  .ice-dock {
+    flex-wrap: wrap;
+    gap: 12px;
+    min-height: 260px;
+    padding: 15px 18px;
+  }
+  .ice-build-guide {
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    height: 92px;
+  }
+  .ice-flavors {
+    margin-top: 95px;
+    width: calc(100% - 70px);
+    flex: auto;
+  }
+  .ice-undo {
+    margin-top: 95px;
+  }
+  .ice-flavor {
+    height: 124px;
+  }
+  .ice-order {
+    right: 8%;
+    bottom: 64%;
+  }
+  .ice-shopkeeper {
+    left: -9%;
+    width: 59%;
+    height: 76%;
+    bottom: 10%;
+  }
+  .ice-workspace {
+    left: 53%;
+  }
+  .ice-portrait {
+    left: 3%;
+    top: 25%;
+    width: 155px;
+    height: 155px;
+  }
+  .ice-goal {
+    top: 58px;
+  }
+  .ice-stage .ice-customer {
+    right: 1%;
+    width: 27%;
+    bottom: 22%;
+  }
+  .ice-party {
+    gap: 0;
+  }
+  .ice-result .ice-shopkeeper {
+    width: 52%;
+    left: -8%;
+  }
+}
+@media (max-height: 700px) and (orientation: landscape) {
+  .ice-stage {
+    min-height: 255px;
+  }
+  .ice-dock {
+    min-height: 175px;
+    padding: 10px 18px;
+    gap: 15px;
+  }
+  .ice-flavor {
+    height: 125px;
+  }
+  .ice-workspace .ice-cone,
+  .ice-delivery > .ice-cone {
+    width: 69px;
+    height: calc(68px + var(--scoops) * 29px);
+  }
+  .ice-workspace .ice-wafer,
+  .ice-delivery .ice-wafer {
+    height: 74px;
+  }
+  .ice-workspace .ice-layer,
+  .ice-delivery .ice-layer {
+    height: 44px;
+    bottom: calc(63px + var(--layer) * 29px);
+  }
+  .ice-order {
+    right: 6%;
+    bottom: 61%;
+    padding: 8px 22px 8px 37px;
+  }
+  .ice-order .ice-cone {
+    width: 40px;
+    height: calc(36px + var(--scoops) * 17px);
+  }
+  .ice-order .ice-wafer {
+    height: 40px;
+  }
+  .ice-order .ice-layer {
+    bottom: calc(33px + var(--layer) * 17px);
+    height: 26px;
+  }
+  .ice-order .ice-step {
+    top: 4px;
+  }
+  .ice-portrait {
+    width: 140px;
+    height: 140px;
+  }
+  .ice-portrait .ice-bar {
+    width: 340px;
+    height: 340px;
+    left: -113px;
+    top: -20px;
+  }
+  .ice-goal {
+    padding: 6px 9px;
+    top: 54px;
+  }
+  .ice-stage .ice-customer {
+    max-width: 150px;
+  }
+}
+@media (max-width: 900px) and (orientation: landscape) {
+  .ice-build-guide {
+    gap: 8px;
+    padding: 6px 12px;
+  }
+  .ice-flavors {
+    gap: 9px;
+  }
+  .ice-flavor {
+    min-width: 70px;
+  }
+  .ice-order {
+    right: 5%;
+  }
+  .ice-goal {
+    gap: 4px;
+  }
+}
+@media (max-width: 600px) {
+  .ice-flavors {
+    gap: 7px;
+  }
+  .ice-flavor {
+    min-width: 48px;
+    padding: 4px;
+  }
+  .ice-flavor > .ice-scoop {
+    width: 52px;
+    height: 48px;
+    top: 22px;
+  }
+  .ice-goal {
+    gap: 4px;
+    padding: 6px;
+  }
+  .ice-portrait {
+    width: 130px;
+    height: 130px;
+  }
+  .ice-stage {
+    min-height: 360px;
+  }
+  .ice-order {
+    right: 4%;
+  }
+  .ice-workspace {
+    left: 54%;
+  }
+}
+
+.app-shell.icecream-shell {
+  min-height: 0;
+}
+.brand-symbol.ice-brand:after {
+  display: none;
+}
+.brand-symbol.ice-brand .ice-bar {
+  width: 64px;
+  height: 64px;
+}
+
+/* Keep long orders inside the shop and beside the customer on short tablets. */
+.ice-order {
+  top: max(54px, 13%);
+  bottom: auto;
+  right: 24%;
+}
+@media (orientation: portrait) {
+  .ice-order {
+    top: 18%;
+    bottom: auto;
+    right: 8%;
+  }
+}
+@media (max-width: 900px) and (orientation: landscape) {
+  .ice-order {
+    right: 24%;
+  }
+}
+
+/* Frame poses place his face at different horizontal anchors. */
+.ice-portrait .ice-bar {
+  left: 50%;
+  transform: translateX(-53%);
+}
+.ice-portrait .mood-surprised {
+  transform: translateX(-39.5%);
+}
+@media (max-height: 700px) and (orientation: landscape) {
+  .ice-workspace .ice-cone,
+  .ice-delivery > .ice-cone {
+    height: calc(68px + var(--scoops) * 24px);
+  }
+  .ice-workspace .ice-layer,
+  .ice-delivery .ice-layer {
+    height: 40px;
+    bottom: calc(63px + var(--layer) * 24px);
+  }
+}
