@@ -1,4 +1,11 @@
 import {
+  makeIcecreamQuestions,
+  submitIcecream,
+  validIcecreamRound,
+  icecreamScore,
+  ICECREAM_GOAL,
+} from "./icecream-model.js";
+import {
   makeExploreQuestions,
   submitExplore,
   validExploreRound,
@@ -37,6 +44,9 @@ for (let level = 1; level <= 12; level++) {
 export const LEGACY_STAGES = [...STAGES];
 for (let level = 1; level <= 10; level++)
   STAGES.push({ kind: "fishing", level }, { kind: "balloon", level });
+// Append new paths without renumbering any existing stage.
+for (let level = 1; level <= 10; level++)
+  STAGES.push({ kind: "icecream", level });
 export const GAME_TYPES = [
   { kind: "race", name: "Car race", levels: 12, color: "#d47b67" },
   { kind: "food", name: "Feed Bar", levels: 12, color: "#82a66e" },
@@ -49,6 +59,7 @@ export const GAME_TYPES = [
   },
   { kind: "fishing", name: "Fishing", levels: 10, color: "#63a9b8" },
   { kind: "balloon", name: "Balloon adventure", levels: 10, color: "#cf8eae" },
+  { kind: "icecream", name: "Ice cream shop", levels: 10, color: "#d58fa4" },
 ];
 export const gameInfo = (kind) => GAME_TYPES.find((game) => game.kind === kind);
 export function isStageUnlocked(save, stage, { unlockAllLevels = false } = {}) {
@@ -114,6 +125,7 @@ export function foodProgress(round) {
   };
 }
 export function wonRound(round) {
+  if (round.kind === "icecream") return icecreamScore(round) >= ICECREAM_GOAL;
   return ["fishing", "balloon"].includes(round.kind)
     ? exploreScore(round) >= EXPLORE_GOAL
     : round.kind === "pancake"
@@ -129,6 +141,8 @@ export function newRound(stage, seed) {
   const round = { ...race.newRound(info.level, seed), ...info };
   if (["fishing", "balloon"].includes(info.kind))
     round.tasks = makeExploreQuestions(info.kind, info.level, round.seed);
+  if (info.kind === "icecream")
+    round.tasks = makeIcecreamQuestions(info.level, round.seed);
   if (info.kind === "pancake")
     round.tasks = makePancakeQuestions(info.level, round.seed);
   if (info.kind === "rocket")
@@ -160,6 +174,7 @@ export function newRound(stage, seed) {
   return round;
 }
 export function submit(round, value) {
+  if (round.kind === "icecream") return submitIcecream(round, value);
   if (["fishing", "balloon"].includes(round.kind))
     return submitExplore(round, value);
   if (round.kind === "pancake") return submitPancake(round, value);
@@ -186,21 +201,25 @@ export function freshSave() {
     taughtPancake: false,
     taughtFishing: false,
     taughtBalloon: false,
+    taughtIcecream: false,
     cafeStyle: "waffle",
   };
 }
 export function completeRound(save) {
   const r = save.round;
   if (!r || r.status !== "finished") return;
-  const points = ["fishing", "balloon"].includes(r.kind)
-    ? exploreScore(r)
-    : r.kind === "pancake"
-      ? pancakeScore(r)
-      : r.kind === "rocket"
-        ? rocketProgress(r).cells
-        : r.kind === "food"
-          ? foodProgress(r).points
-          : race.score(r);
+  const points =
+    r.kind === "icecream"
+      ? icecreamScore(r)
+      : ["fishing", "balloon"].includes(r.kind)
+        ? exploreScore(r)
+        : r.kind === "pancake"
+          ? pancakeScore(r)
+          : r.kind === "rocket"
+            ? rocketProgress(r).cells
+            : r.kind === "food"
+              ? foodProgress(r).points
+              : race.score(r);
   save.best[r.stage] = Math.max(save.best[r.stage] || 0, points);
   if (wonRound(r)) {
     if (!save.completed.includes(r.stage)) save.completed.push(r.stage);
@@ -307,7 +326,7 @@ export function normalizeSave(raw, { unlockAllLevels = false } = {}) {
           0,
           ["fishing", "balloon"].includes(stageInfo(+n).kind)
             ? 6
-            : stageInfo(+n).kind === "pancake"
+            : ["pancake", "icecream"].includes(stageInfo(+n).kind)
               ? 5
               : stageInfo(+n).kind === "food"
                 ? 10
@@ -330,6 +349,7 @@ export function normalizeSave(raw, { unlockAllLevels = false } = {}) {
   save.taughtPancake = raw.taughtPancake === true;
   save.taughtFishing = raw.taughtFishing === true;
   save.taughtBalloon = raw.taughtBalloon === true;
+  save.taughtIcecream = raw.taughtIcecream === true;
   save.cafeStyle = raw.cafeStyle === "pancake" ? "pancake" : "waffle";
   const r = raw.round;
   if (
@@ -348,7 +368,7 @@ export function normalizeSave(raw, { unlockAllLevels = false } = {}) {
     r.kind !== info.kind ||
     !Array.isArray(r.tasks) ||
     r.tasks.length !==
-      (info.kind === "pancake"
+      (["pancake", "icecream"].includes(info.kind)
         ? 5
         : ["fishing", "balloon"].includes(info.kind)
           ? 6
@@ -358,6 +378,10 @@ export function normalizeSave(raw, { unlockAllLevels = false } = {}) {
     return save;
   if (["fishing", "balloon"].includes(info.kind)) {
     if (validExploreRound(r)) save.round = r;
+    return save;
+  }
+  if (info.kind === "icecream") {
+    if (validIcecreamRound(r)) save.round = r;
     return save;
   }
   if (info.kind === "pancake") {
